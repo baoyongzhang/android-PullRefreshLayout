@@ -1,5 +1,6 @@
 package com.baoyz.widget;
 
+import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
@@ -10,9 +11,23 @@ import android.graphics.drawable.Drawable;
  */
 public abstract class RefreshDrawable extends Drawable implements Drawable.Callback, Animatable {
 
+    private PullRefreshLayout mRefreshLayout;
 
-    public abstract void setColorSchemeColors(int[] colorSchemeColors);
+    public RefreshDrawable(Context context, PullRefreshLayout layout) {
+        mRefreshLayout = layout;
+    }
+
+    public Context getContext(){
+        return mRefreshLayout != null ? mRefreshLayout.getContext() : null;
+    }
+
+    public PullRefreshLayout getRefreshLayout(){
+        return mRefreshLayout;
+    }
+
     public abstract void setPercent(float percent);
+    public abstract void setColorSchemeColors(int[] colorSchemeColors);
+
     public abstract void offsetTopAndBottom(int offset);
 
     @Override

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PullRefreshLayout">
+        <attr name="type" format="enum">
+            <enum name="circles" value="0" />
+            <enum name="water_drop" value="1" />
+        </attr>
+        <attr name="colors" format="reference"/>
+    </declare-styleable>
+</resources>

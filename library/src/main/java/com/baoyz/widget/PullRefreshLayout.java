@@ -1,6 +1,7 @@
 package com.baoyz.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
@@ -18,26 +19,26 @@ import android.view.animation.Transformation;
 import android.widget.AbsListView;
 import android.widget.ImageView;
 
+import java.security.InvalidParameterException;
+
 /**
  * Created by baoyz on 14/10/30.
  */
 public class PullRefreshLayout extends ViewGroup {
 
     private static final float DECELERATE_INTERPOLATION_FACTOR = 2f;
-    private static final int REFRESH_VIEW_DIAMETER = 40;
     private static final int DRAG_MAX_DISTANCE = 64;
     private static final int INVALID_POINTER = -1;
     private static final float DRAG_RATE = .5f;
-    private static final int ANIMATE_TO_TRIGGER_DURATION = 200;
-    private static final int ANIMATE_TO_START_DURATION = 200;
+
+    public static final int TYPE_CIRCLES = 0;
+    public static final int TYPE_WATER_DROP = 1;
 
     private View mTarget;
     private ImageView mRefreshView;
     private Interpolator mDecelerateInterpolator;
     private int mTouchSlop;
     private int mMediumAnimationDuration;
-    private int mRefreshViewWidth;
-    private int mRefreshViewHeight;
     private int mSpinnerFinalOffset;
     private int mTotalDragDistance;
     private RefreshDrawable mRefreshDrawable;
@@ -49,6 +50,7 @@ public class PullRefreshLayout extends ViewGroup {
     private int mFrom;
     private boolean mNotify;
     private OnRefreshListener mListener;
+    private int[] mColorSchemeColors;
 
     public PullRefreshLayout(Context context) {
         this(context, null);
@@ -56,24 +58,45 @@ public class PullRefreshLayout extends ViewGroup {
 
     public PullRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullRefreshLayout);
+        final int type = a.getInteger(R.styleable.PullRefreshLayout_type, TYPE_CIRCLES);
+        final int colorsId = a.getResourceId(R.styleable.PullRefreshLayout_colors, R.array.google_colors);
+        a.recycle();
 
         mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mMediumAnimationDuration = getResources().getInteger(
                 android.R.integer.config_mediumAnimTime);
-        mRefreshViewHeight = mRefreshViewWidth = dp2px(REFRESH_VIEW_DIAMETER);
         mSpinnerFinalOffset = mTotalDragDistance = dp2px(DRAG_MAX_DISTANCE);
 
         mRefreshView = new ImageView(context);
-//        mRefreshDrawable = new CirclesDrawable(context);
-        mRefreshDrawable = new WaterDropDrawable(context);
-        mRefreshDrawable.setColorSchemeColors(new int[]{Color.rgb(0xC9, 0x34, 0x37), Color.rgb(0x37, 0x5B, 0xF1), Color.rgb(0xF7, 0xD2, 0x3E), Color.rgb(0x34, 0xA3, 0x50)});
-        mRefreshView.setImageDrawable(mRefreshDrawable);
+        mColorSchemeColors = context.getResources().getIntArray(colorsId);
+        setRefreshType(type);
+//        mRefreshDrawable.setColorSchemeColors(new int[]{Color.rgb(0xC9, 0x34, 0x37), Color.rgb(0x37, 0x5B, 0xF1), Color.rgb(0xF7, 0xD2, 0x3E), Color.rgb(0x34, 0xA3, 0x50)});
         mRefreshView.setVisibility(View.GONE);
         addView(mRefreshView);
 
         setWillNotDraw(false);
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
+    }
+
+    public void setRefreshType(int type){
+        switch (type){
+            case TYPE_CIRCLES:
+                mRefreshDrawable = new CirclesDrawable(getContext(), this);
+                break;
+            case TYPE_WATER_DROP:
+                mRefreshDrawable = new WaterDropDrawable(getContext(), this);
+                break;
+            default:
+                throw new InvalidParameterException("Type does not exist");
+        }
+        mRefreshDrawable.setColorSchemeColors(mColorSchemeColors);
+        mRefreshView.setImageDrawable(mRefreshDrawable);
+    }
+
+    public int getFinalOffset(){
+        return mSpinnerFinalOffset;
     }
 
     @Override
@@ -169,30 +192,21 @@ public class PullRefreshLayout extends ViewGroup {
                 }
 
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-                // 计算实际应该滚动的距离，触摸偏移量 * 比率（0.5）
                 final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
-                // 计算滑动的百分比
                 float originalDragPercent = overscrollTop / mTotalDragDistance;
                 if (originalDragPercent < 0) {
                     return false;
                 }
-                // 滑动百分比，如果大于1的话为1
                 float dragPercent = Math.min(1f, Math.abs(originalDragPercent));
-                // 校正后的百分比
                 float adjustedPercent = (float) Math.max(dragPercent - .4, 0) * 5 / 3;
 //                    float adjustedPercent = dragPercent;
-                // 剩余的距离，正数的话说明超出了总距离
                 float extraOS = Math.abs(overscrollTop) - mTotalDragDistance;
-                // 记录总距离
                 float slingshotDist = mSpinnerFinalOffset;
-                // 超出总距离的百分比
                 float tensionSlingshotPercent = Math.max(0,
                         Math.min(extraOS, slingshotDist * 2) / slingshotDist);
                 float tensionPercent = (float) ((tensionSlingshotPercent / 4) - Math.pow(
                         (tensionSlingshotPercent / 4), 2)) * 2f;
-                // 超出需要移动的距离
                 float extraMove = (slingshotDist) * tensionPercent * 2;
-                // 计算最终移动的Y
                 int targetY = (int) ((slingshotDist * dragPercent) + extraMove);
                 if (mRefreshView.getVisibility() != View.VISIBLE) {
                     mRefreshView.setVisibility(View.VISIBLE);
@@ -242,24 +256,19 @@ public class PullRefreshLayout extends ViewGroup {
     private void animateOffsetToStartPosition() {
 
         // TODO 移动到开始位置
-//        if (mScale) {
-//            // Scale the item back down
-//            startScaleDownReturnToStartAnimation(from, listener);
-//        } else {
         mFrom = mCurrentOffsetTop;
         mAnimateToStartPosition.reset();
-        mAnimateToStartPosition.setDuration(ANIMATE_TO_START_DURATION);
+        mAnimateToStartPosition.setDuration(mMediumAnimationDuration);
         mAnimateToStartPosition.setInterpolator(mDecelerateInterpolator);
         mAnimateToStartPosition.setAnimationListener(mToStartListener);
         mRefreshView.clearAnimation();
         mRefreshView.startAnimation(mAnimateToStartPosition);
-//        }
     }
 
     private void animateOffsetToCorrectPosition() {
         mFrom = mCurrentOffsetTop;
         mAnimateToCorrectPosition.reset();
-        mAnimateToCorrectPosition.setDuration(ANIMATE_TO_TRIGGER_DURATION);
+        mAnimateToCorrectPosition.setDuration(mMediumAnimationDuration);
         mAnimateToCorrectPosition.setInterpolator(mDecelerateInterpolator);
         mAnimateToCorrectPosition.setAnimationListener(mRefreshListener);
         mRefreshView.clearAnimation();
@@ -357,7 +366,6 @@ public class PullRefreshLayout extends ViewGroup {
         final int pointerIndex = MotionEventCompat.getActionIndex(ev);
         final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
         if (pointerId == mActivePointerId) {
-            // This was our ac and adjust accordingly.
             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
             mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
         }

@@ -12,7 +12,7 @@ import android.os.Handler;
 /**
  * Created by baoyz on 14/10/31.
  */
-public class WaterDropDrawable extends RefreshDrawable implements Runnable{
+public class WaterDropDrawable extends RefreshDrawable implements Runnable {
 
     private static final float MAX_LEVEL = 10000;
     private static final float CIRCLE_COUNT = ProgressStates.values().length;
@@ -24,7 +24,7 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
     private Path mPath;
     private int mHeight;
     private int mWidth;
-    private Context mContext;
+    private int mTop;
     private int[] mColorSchemeColors;
     private ProgressStates mCurrentState;
     private Handler mHandler = new Handler();
@@ -37,8 +37,8 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
         FOUR
     }
 
-    public WaterDropDrawable(Context context) {
-        mContext = context;
+    public WaterDropDrawable(Context context, PullRefreshLayout layout) {
+        super(context, layout);
         mPaint = new Paint();
         mPaint.setColor(Color.BLUE);
         mPaint.setStyle(Paint.Style.FILL);
@@ -48,15 +48,20 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
         p2 = new Point();
         p3 = new Point();
         p4 = new Point();
-        mContext = context;
     }
 
     @Override
     public void draw(Canvas canvas) {
-        mPath.reset();;
+
+        canvas.save();
+        canvas.translate(0, mTop > 0 ? mTop : 0);
+
+        mPath.reset();
         mPath.moveTo(p1.x, p1.y);
         mPath.cubicTo(p3.x, p3.y, p4.x, p4.y, p2.x, p2.y);
         canvas.drawPath(mPath, mPaint);
+
+        canvas.restore();
     }
 
     @Override
@@ -67,21 +72,21 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
     }
 
     private void updateBounds() {
+
         int height = mHeight;
         int width = mWidth;
-        int offsetX = (int) (height * 2.6f);
-        int offsetY = 0;
 
-        if (offsetX > (width / 2)){
-            // 平移
-            offsetY = (int) ((offsetX - width / 2) / 2.6f);
-            offsetX = width / 2;
+        if (height > getRefreshLayout().getFinalOffset()) {
+            height = getRefreshLayout().getFinalOffset();
         }
 
+        float precent = height / (float) getRefreshLayout().getFinalOffset();
+        int offsetX = (int) (width / 2 * precent);
+        int offsetY = 0;
         p1.set(offsetX, offsetY);
         p2.set(width - offsetX, offsetY);
-        p3.set(width / 2 - offsetX / 2, height);
-        p4.set(width / 2 + offsetX / 2, height);
+        p3.set(width / 2 - height, height);
+        p4.set(width / 2 + height, height);
     }
 
     @Override
@@ -95,7 +100,7 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
         mPaint.setColor(evaluate(percent, mColorSchemeColors[0], mColorSchemeColors[1]));
     }
 
-    private void updateLevel(int level){
+    private void updateLevel(int level) {
         int animationLevel = level == MAX_LEVEL ? 0 : level;
 
         int stateForLevel = (int) (animationLevel / MAX_LEVEL_PER_CIRCLE);
@@ -110,12 +115,15 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
     @Override
     public void offsetTopAndBottom(int offset) {
         mHeight += offset;
+        mTop = mHeight - getRefreshLayout().getFinalOffset();
+        // 拉伸
         updateBounds();
         invalidateSelf();
     }
 
     @Override
     public void start() {
+        mLevel = 2500;
         isRunning = true;
         mHandler.postDelayed(this, 20);
     }
@@ -155,10 +163,10 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable{
         int endG = (endInt >> 8) & 0xff;
         int endB = endInt & 0xff;
 
-        return ((startA + (int)(fraction * (endA - startA))) << 24) |
-               ((startR + (int)(fraction * (endR - startR))) << 16) |
-               ((startG + (int)(fraction * (endG - startG))) << 8) |
-               ((startB + (int)(fraction * (endB - startB))));
+        return ((startA + (int) (fraction * (endA - startA))) << 24) |
+                ((startR + (int) (fraction * (endR - startR))) << 16) |
+                ((startG + (int) (fraction * (endG - startG))) << 8) |
+                ((startB + (int) (fraction * (endB - startB))));
     }
 
 }

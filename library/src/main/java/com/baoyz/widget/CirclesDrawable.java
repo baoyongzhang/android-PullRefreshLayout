@@ -42,13 +42,12 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
     private int mLevel;
     private boolean isRunning;
     private int mTop;
-    private Context mContext;
     private int mDrawWidth;
     private int mDrawHeight;
     private Rect mBounds;
 
-    public CirclesDrawable(Context context) {
-        mContext = context;
+    public CirclesDrawable(Context context, PullRefreshLayout layout) {
+        super(context, layout);
     }
 
     @Override
@@ -107,6 +106,8 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
             mAbovePaint.setColor(mFstHalfPaint.getColor());
         }
 
+        mAbovePaint.setAlpha(200 + (int) (55 * (levelForCircle / MAX_LEVEL_PER_CIRCLE)));
+
         mAxisValue = (int) (mControlPointMinimum + (mControlPointMaximum - mControlPointMinimum) * (levelForCircle / MAX_LEVEL_PER_CIRCLE));
 
     }
@@ -119,11 +120,11 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
 
     @Override
     public void run() {
-        mLevel += 60;
+        mLevel += 80;
         if (mLevel > MAX_LEVEL)
             mLevel = 0;
         if (isRunning) {
-            mHandler.postDelayed(this, 10);
+            mHandler.postDelayed(this, 20);
             updateLevel(mLevel);
             invalidateSelf();
         }
@@ -162,7 +163,7 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
         super.onBoundsChange(bounds);
         mDrawWidth = dp2px(40);
         mDrawHeight = mDrawWidth;
-        mTop = -mDrawHeight;
+        mTop = -mDrawHeight - (getRefreshLayout().getFinalOffset() - mDrawHeight) / 2;
         mBounds = bounds;
         measureCircleProgress(mDrawWidth, mDrawHeight);
     }
@@ -200,11 +201,6 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
             makeCirclesProgress(canvas);
             canvas.restore();
         }
-    }
-
-    @Override
-    public void setAlpha(int alpha) {
-
     }
 
     private void measureCircleProgress(int width, int height) {
@@ -256,6 +252,6 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
     }
 
     private int dp2px(int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, mContext.getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getContext().getResources().getDisplayMetrics());
     }
 }

@@ -82,8 +82,8 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable {
             height = getRefreshLayout().getFinalOffset();
         }
 
-        float precent = height / (float) getRefreshLayout().getFinalOffset();
-        int offsetX = (int) (width / 2 * precent);
+        final float percent = height / (float) getRefreshLayout().getFinalOffset();
+        int offsetX = (int) (width / 2 * percent);
         int offsetY = 0;
         p1.set(offsetX, offsetY);
         p2.set(width - offsetX, offsetY);

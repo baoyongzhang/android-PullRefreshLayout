@@ -66,7 +66,7 @@ In xml, use attributes.
 </com.baoyz.widget.PullRefreshLayout>
 
 ```
- 
+
 Change the color scheme.
 In java, call `setColorSchemeColors` method. The int array length must be 4.
 

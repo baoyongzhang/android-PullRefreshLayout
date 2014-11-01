@@ -43,6 +43,8 @@ public class DemoActivity extends Activity {
                 }, 5000);
             }
         });
+
+        layout.setRefreshing(true);
     }
 
     static class ArrayAdapter extends RecyclerView.Adapter<ViewHolder>{

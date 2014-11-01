@@ -8,9 +8,7 @@
     <com.baoyz.widget.PullRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:type="water_drop"
-        app:colors="@array/scheme_colors">
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"

@@ -20,7 +20,7 @@ Use it in your layout xml.
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-	<!-- ListView、ScrollView、RecyclerView、Other-->
+	<!-- ListView、ScrollView、RecyclerView、Other -->
 	
 </com.baoyz.widget.PullRefreshLayout>
 

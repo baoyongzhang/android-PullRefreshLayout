@@ -39,7 +39,7 @@ layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
     }
 });
 
-// refresh complete
+// refresh complete 
 layout.setRefreshing(false);
 
 ```

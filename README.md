@@ -14,7 +14,7 @@ Use method like SwipeRefreshLayout's usage.
 
 Use it in your layout xml.
 
-```xml
+```xml 
 <com.baoyz.widget.PullRefreshLayout
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
@@ -60,8 +60,29 @@ In xml, use attributes.
 <com.baoyz.widget.PullRefreshLayout
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-	app:type="water_drop"
+    android:layout_height="match_parent"
+	app:type="water_drop">
+	
+</com.baoyz.widget.PullRefreshLayout>
+
+```
+
+Change the color scheme.
+In java, call `setColorSchemeColors` method. The int array length must be 4.
+
+```java
+layout.setColorSchemeColors(int []);
+
+```
+
+In xml, use attributes.
+
+```xml
+<com.baoyz.widget.PullRefreshLayout
+    android:id="@+id/swipeRefreshLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:colors="@array/scheme_colors">
 	
 </com.baoyz.widget.PullRefreshLayout>
 

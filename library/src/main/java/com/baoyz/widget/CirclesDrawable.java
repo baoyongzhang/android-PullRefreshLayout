@@ -10,6 +10,8 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.util.TypedValue;
 
+import java.security.InvalidParameterException;
+
 /**
  * Created by baoyz on 14/10/31.
  */
@@ -152,6 +154,8 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
     }
 
     private void initColors(int[] colors) {
+        if (colors == null || colors.length < 4)
+            throw new InvalidParameterException("The color scheme length must be 4");
         mColor1 = colors[0];
         mColor2 = colors[1];
         mColor3 = colors[2];

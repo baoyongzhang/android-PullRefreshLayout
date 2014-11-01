@@ -2,7 +2,12 @@
 <resources>
 
     <string name="app_name">android-PullRefreshLayout</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+
+    <array name="scheme_colors">
+        <item>@color/orange</item>
+        <item>@color/pink</item>
+        <item>@color/green</item>
+        <item>@color/blue</item>
+    </array>
 
 </resources>

@@ -80,6 +80,11 @@ public class PullRefreshLayout extends ViewGroup {
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
     }
 
+    public void setColorSchemeColors(int[] colorSchemeColors){
+        mColorSchemeColors = colorSchemeColors;
+        mRefreshDrawable.setColorSchemeColors(colorSchemeColors);
+    }
+
     public void setRefreshType(int type){
         switch (type){
             case TYPE_CIRCLES:

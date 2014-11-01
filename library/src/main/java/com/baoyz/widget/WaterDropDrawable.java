@@ -9,6 +9,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 
+import java.security.InvalidParameterException;
+
 /**
  * Created by baoyz on 14/10/31.
  */
@@ -91,6 +93,8 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable {
 
     @Override
     public void setColorSchemeColors(int[] colorSchemeColors) {
+        if (colorSchemeColors == null || colorSchemeColors.length < 4)
+            throw new InvalidParameterException("The color scheme length must be 4");
         mPaint.setColor(colorSchemeColors[0]);
         mColorSchemeColors = colorSchemeColors;
     }

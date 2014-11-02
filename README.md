@@ -44,13 +44,12 @@ layout.setRefreshing(false);
 
 ```
 
-Change the refresh type, there are tree types of use, `CIRCLES`、 `WATER_DROP` and `RING`.  
+Change the refresh style, there are tree styles of use, `CIRCLES`、 `WATER_DROP` and `RING`.  
 
-In java, call `setRefreshType` method.
+In java, call `setRefreshStyle` method.
 
 ```java
-layout.setRefreshType(PullRefreshLayout.TYPE_CIRCLES);
-layout.setRefreshType(PullRefreshLayout.TYPE_WATER_DROP);
+layout.setRefreshStyle(PullRefreshLayout.STYLE_CIRCLES);
 
 ```
 

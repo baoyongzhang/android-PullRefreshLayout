@@ -14,7 +14,7 @@ import java.security.InvalidParameterException;
 /**
  * Created by baoyz on 14/10/31.
  */
-public class WaterDropDrawable extends RefreshDrawable implements Runnable {
+class WaterDropDrawable extends RefreshDrawable implements Runnable {
 
     private static final float MAX_LEVEL = 10000;
     private static final float CIRCLE_COUNT = ProgressStates.values().length;
@@ -110,17 +110,16 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable {
         int stateForLevel = (int) (animationLevel / MAX_LEVEL_PER_CIRCLE);
         mCurrentState = ProgressStates.values()[stateForLevel];
 
-        float precent = level % 2500 / 2500f;
+        float percent = level % 2500 / 2500f;
         int startColor = mColorSchemeColors[stateForLevel];
         int endColor = mColorSchemeColors[(stateForLevel + 1) % ProgressStates.values().length];
-        mPaint.setColor(evaluate(precent, startColor, endColor));
+        mPaint.setColor(evaluate(percent, startColor, endColor));
     }
 
     @Override
     public void offsetTopAndBottom(int offset) {
         mHeight += offset;
         mTop = mHeight - getRefreshLayout().getFinalOffset();
-        // 拉伸
         updateBounds();
         invalidateSelf();
     }
@@ -154,7 +153,7 @@ public class WaterDropDrawable extends RefreshDrawable implements Runnable {
         }
     }
 
-    public int evaluate(float fraction, int startValue, int endValue) {
+    private int evaluate(float fraction, int startValue, int endValue) {
         int startInt = startValue;
         int startA = (startInt >> 24) & 0xff;
         int startR = (startInt >> 16) & 0xff;

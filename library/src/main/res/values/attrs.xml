@@ -4,6 +4,7 @@
         <attr name="type" format="enum">
             <enum name="circles" value="0" />
             <enum name="water_drop" value="1" />
+            <enum name="ring" value="2" />
         </attr>
         <attr name="colors" format="reference"/>
     </declare-styleable>

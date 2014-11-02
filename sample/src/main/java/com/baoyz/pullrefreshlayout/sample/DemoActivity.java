@@ -40,11 +40,9 @@ public class DemoActivity extends Activity {
                     public void run() {
                         layout.setRefreshing(false);
                     }
-                }, 5000);
+                }, 4000);
             }
         });
-
-        layout.setRefreshing(true);
     }
 
     static class ArrayAdapter extends RecyclerView.Adapter<ViewHolder>{
@@ -100,6 +98,9 @@ public class DemoActivity extends Activity {
                 return true;
             case R.id.action_water_drop:
                 layout.setRefreshType(PullRefreshLayout.TYPE_WATER_DROP);
+                return true;
+            case R.id.action_ring:
+                layout.setRefreshType(PullRefreshLayout.TYPE_RING);
                 return true;
         }
 

@@ -15,7 +15,7 @@ import java.security.InvalidParameterException;
 /**
  * Created by baoyz on 14/10/31.
  */
-public class CirclesDrawable extends RefreshDrawable implements Runnable {
+class CirclesDrawable extends RefreshDrawable implements Runnable {
 
     private static final float MAX_LEVEL = 10000;
     private static final float CIRCLE_COUNT = ProgressStates.values().length;

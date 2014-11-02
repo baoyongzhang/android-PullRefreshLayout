@@ -2,11 +2,9 @@ package com.baoyz.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,6 +31,9 @@ public class PullRefreshLayout extends ViewGroup {
 
     public static final int TYPE_CIRCLES = 0;
     public static final int TYPE_WATER_DROP = 1;
+    public static final int TYPE_RING = 2;
+    public static final int MODE_TOP = 0;
+    public static final int MODE_BOTTOM = 1;
 
     private View mTarget;
     private ImageView mRefreshView;
@@ -51,6 +52,7 @@ public class PullRefreshLayout extends ViewGroup {
     private boolean mNotify;
     private OnRefreshListener mListener;
     private int[] mColorSchemeColors;
+    private int mMode;
 
     public PullRefreshLayout(Context context) {
         this(context, null);
@@ -86,12 +88,16 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     public void setRefreshType(int type){
+        setRefreshing(false);
         switch (type){
             case TYPE_CIRCLES:
                 mRefreshDrawable = new CirclesDrawable(getContext(), this);
                 break;
             case TYPE_WATER_DROP:
                 mRefreshDrawable = new WaterDropDrawable(getContext(), this);
+                break;
+            case TYPE_RING:
+                mRefreshDrawable = new RingDrawable(getContext(), this);
                 break;
             default:
                 throw new InvalidParameterException("Type does not exist");
@@ -149,7 +155,6 @@ public class PullRefreshLayout extends ViewGroup {
                 if (initialMotionY == -1) {
                     return false;
                 }
-                // 记录按下的初始Y
                 mInitialMotionY = initialMotionY;
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -160,9 +165,11 @@ public class PullRefreshLayout extends ViewGroup {
                 if (y == -1) {
                     return false;
                 }
-                // 计算偏移量Y
                 final float yDiff = y - mInitialMotionY;
-                // 如果滑动偏移量大于溢出，则开始拖动，拦截触摸
+//                if (Math.abs(yDiff) > mTouchSlop && !mIsBeingDragged) {
+//                    mIsBeingDragged = true;
+//                    mMode = yDiff > 0 ? MODE_TOP : MODE_BOTTOM;
+//                }
                 if (yDiff > mTouchSlop && !mIsBeingDragged) {
                     mIsBeingDragged = true;
                 }
@@ -197,15 +204,17 @@ public class PullRefreshLayout extends ViewGroup {
                 }
 
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-                final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
-                float originalDragPercent = overscrollTop / mTotalDragDistance;
+//                final float yDiff = Math.abs(y - mInitialMotionY);
+                final float yDiff = y - mInitialMotionY;
+                final float scrollTop = yDiff * DRAG_RATE;
+                float originalDragPercent = scrollTop / mTotalDragDistance;
                 if (originalDragPercent < 0) {
                     return false;
                 }
                 float dragPercent = Math.min(1f, Math.abs(originalDragPercent));
-                float adjustedPercent = (float) Math.max(dragPercent - .4, 0) * 5 / 3;
+//                float adjustedPercent = (float) Math.max(dragPercent - .4, 0) * 5 / 3;
 //                    float adjustedPercent = dragPercent;
-                float extraOS = Math.abs(overscrollTop) - mTotalDragDistance;
+                float extraOS = Math.abs(scrollTop) - mTotalDragDistance;
                 float slingshotDist = mSpinnerFinalOffset;
                 float tensionSlingshotPercent = Math.max(0,
                         Math.min(extraOS, slingshotDist * 2) / slingshotDist);
@@ -216,12 +225,9 @@ public class PullRefreshLayout extends ViewGroup {
                 if (mRefreshView.getVisibility() != View.VISIBLE) {
                     mRefreshView.setVisibility(View.VISIBLE);
                 }
-                if (overscrollTop < mTotalDragDistance) {
-                    // TODO 更新百分比
-                    Log.i("byz", "percent " + dragPercent);
+                if (scrollTop < mTotalDragDistance) {
                     mRefreshDrawable.setPercent(dragPercent);
                 }
-                // 更新位置
                 setTargetOffsetTop(targetY - mCurrentOffsetTop, true);
                 break;
             }
@@ -242,11 +248,9 @@ public class PullRefreshLayout extends ViewGroup {
                 final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
                 mIsBeingDragged = false;
                 if (overscrollTop > mTotalDragDistance) {
-                    // 超出了最大距离，开始刷新
                     setRefreshing(true, true);
                 } else {
                     mRefreshing = false;
-                    // 移动到原位
                     animateOffsetToStartPosition();
                 }
                 mActivePointerId = INVALID_POINTER;
@@ -259,8 +263,6 @@ public class PullRefreshLayout extends ViewGroup {
 
 
     private void animateOffsetToStartPosition() {
-
-        // TODO 移动到开始位置
         mFrom = mCurrentOffsetTop;
         mAnimateToStartPosition.reset();
         mAnimateToStartPosition.setDuration(mMediumAnimationDuration);
@@ -326,6 +328,7 @@ public class PullRefreshLayout extends ViewGroup {
     private Animation.AnimationListener mRefreshListener = new Animation.AnimationListener() {
         @Override
         public void onAnimationStart(Animation animation) {
+            mRefreshView.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -385,7 +388,6 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private void setTargetOffsetTop(int offset, boolean requiresUpdate) {
-        // TODO 开始偏移
         mRefreshView.bringToFront();
 //        mRefreshView.offsetTopAndBottom(offset);
         mTarget.offsetTopAndBottom(offset);
@@ -397,6 +399,21 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private boolean canChildScrollUp() {
+        if (android.os.Build.VERSION.SDK_INT < 14) {
+            if (mTarget instanceof AbsListView) {
+                final AbsListView absListView = (AbsListView) mTarget;
+                return absListView.getChildCount() > 0
+                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
+                        .getTop() < absListView.getPaddingTop());
+            } else {
+                return mTarget.getScrollY() > 0;
+            }
+        } else {
+            return ViewCompat.canScrollVertically(mTarget, -1);
+        }
+    }
+
+    private boolean canChildScrollDown() {
         if (android.os.Build.VERSION.SDK_INT < 14) {
             if (mTarget instanceof AbsListView) {
                 final AbsListView absListView = (AbsListView) mTarget;

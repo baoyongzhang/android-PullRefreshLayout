@@ -44,7 +44,7 @@ layout.setRefreshing(false);
 
 ```
 
-Change the refresh type, there are two types of use, `CIRCLES` and `WATER_DROP`.  
+Change the refresh type, there are tree types of use, `CIRCLES`、 `WATER_DROP` and `RING`.  
 
 In java, call `setRefreshType` method.
 

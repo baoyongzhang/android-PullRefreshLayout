@@ -29,9 +29,9 @@ public class PullRefreshLayout extends ViewGroup {
     private static final int INVALID_POINTER = -1;
     private static final float DRAG_RATE = .5f;
 
-    public static final int TYPE_CIRCLES = 0;
-    public static final int TYPE_WATER_DROP = 1;
-    public static final int TYPE_RING = 2;
+    public static final int STYLE_CIRCLES = 0;
+    public static final int STYLE_WATER_DROP = 1;
+    public static final int STYLE_RING = 2;
     public static final int MODE_TOP = 0;
     public static final int MODE_BOTTOM = 1;
 
@@ -61,7 +61,7 @@ public class PullRefreshLayout extends ViewGroup {
     public PullRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullRefreshLayout);
-        final int type = a.getInteger(R.styleable.PullRefreshLayout_type, TYPE_CIRCLES);
+        final int type = a.getInteger(R.styleable.PullRefreshLayout_type, STYLE_CIRCLES);
         final int colorsId = a.getResourceId(R.styleable.PullRefreshLayout_colors, R.array.google_colors);
         a.recycle();
 
@@ -73,7 +73,7 @@ public class PullRefreshLayout extends ViewGroup {
 
         mRefreshView = new ImageView(context);
         mColorSchemeColors = context.getResources().getIntArray(colorsId);
-        setRefreshType(type);
+        setRefreshStyle(type);
 //        mRefreshDrawable.setColorSchemeColors(new int[]{Color.rgb(0xC9, 0x34, 0x37), Color.rgb(0x37, 0x5B, 0xF1), Color.rgb(0xF7, 0xD2, 0x3E), Color.rgb(0x34, 0xA3, 0x50)});
         mRefreshView.setVisibility(View.GONE);
         addView(mRefreshView);
@@ -87,16 +87,16 @@ public class PullRefreshLayout extends ViewGroup {
         mRefreshDrawable.setColorSchemeColors(colorSchemeColors);
     }
 
-    public void setRefreshType(int type){
+    public void setRefreshStyle(int type){
         setRefreshing(false);
         switch (type){
-            case TYPE_CIRCLES:
+            case STYLE_CIRCLES:
                 mRefreshDrawable = new CirclesDrawable(getContext(), this);
                 break;
-            case TYPE_WATER_DROP:
+            case STYLE_WATER_DROP:
                 mRefreshDrawable = new WaterDropDrawable(getContext(), this);
                 break;
-            case TYPE_RING:
+            case STYLE_RING:
                 mRefreshDrawable = new RingDrawable(getContext(), this);
                 break;
             default:

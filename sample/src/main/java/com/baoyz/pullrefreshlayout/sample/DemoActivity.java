@@ -94,13 +94,13 @@ public class DemoActivity extends Activity {
 
         switch (id){
             case R.id.action_circles:
-                layout.setRefreshType(PullRefreshLayout.TYPE_CIRCLES);
+                layout.setRefreshStyle(PullRefreshLayout.STYLE_CIRCLES);
                 return true;
             case R.id.action_water_drop:
-                layout.setRefreshType(PullRefreshLayout.TYPE_WATER_DROP);
+                layout.setRefreshStyle(PullRefreshLayout.STYLE_WATER_DROP);
                 return true;
             case R.id.action_ring:
-                layout.setRefreshType(PullRefreshLayout.TYPE_RING);
+                layout.setRefreshStyle(PullRefreshLayout.STYLE_RING);
                 return true;
         }
 

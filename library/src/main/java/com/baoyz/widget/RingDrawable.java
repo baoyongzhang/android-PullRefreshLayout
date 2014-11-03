@@ -54,15 +54,15 @@ class RingDrawable extends RefreshDrawable{
         mTop += offset;
         mOffsetTop += offset;
         float offsetTop = mOffsetTop - dp2px(20);
-        if (offsetTop < 1) {
+        if (offsetTop <= 0) {
             mAngle = 0;
-            return;
+        }else {
+            int finalOffset = getRefreshLayout().getFinalOffset() - dp2px(20);
+            if (offsetTop > finalOffset) {
+                offsetTop = finalOffset;
+            }
+            mAngle = 340 * (offsetTop / finalOffset);
         }
-        int finalOffset = getRefreshLayout().getFinalOffset() - dp2px(20);
-        if (offsetTop > finalOffset){
-            offsetTop = finalOffset;
-        }
-        mAngle = 340 * (offsetTop / finalOffset);
         invalidateSelf();
     }
 

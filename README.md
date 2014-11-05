@@ -1,7 +1,7 @@
 android-PullRefreshLayout
 =========================
 
-![badge](https://img.shields.io/badge/Android%20Arsenal-android--PullRefreshLayout-brightgreen.svg?style=flat)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-android--PullRefreshLayout-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/1084)
 
 This component like SwipeRefreshLayout, it is more beautiful than SwipeRefreshLayout.
 

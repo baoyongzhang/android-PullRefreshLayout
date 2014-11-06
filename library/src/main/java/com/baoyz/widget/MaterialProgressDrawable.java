@@ -16,6 +16,12 @@
 
 package com.baoyz.widget;
 
+import android.graphics.RadialGradient;
+import android.graphics.Shader;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
+import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -48,7 +54,7 @@ import java.util.ArrayList;
 /**
  * Fancy progress indicator for Material theme.
  *
- * @hide 
+ * @hide
  */
 class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
@@ -58,7 +64,9 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
     @Retention(RetentionPolicy.CLASS)
     @IntDef({LARGE, DEFAULT})
-    public @interface ProgressDrawableSize {}
+    public @interface ProgressDrawableSize {
+    }
+
     // Maps to ProgressBar.Large style
     static final int LARGE = 0;
     // Maps to ProgressBar default style
@@ -74,33 +82,62 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     private static final float CENTER_RADIUS_LARGE = 12.5f;
     private static final float STROKE_WIDTH_LARGE = 3f;
 
-    private final int[] COLORS = new int[] {
-        Color.BLACK
+    private static final float MAX_PROGRESS_ANGLE = .8f;
+    private static final int CIRCLE_BG_LIGHT = 0xFFFAFAFA;
+    private static final int MAX_ALPHA = 255;
+
+    private final int[] COLORS = new int[]{
+            Color.BLACK
     };
 
-    /** The duration of a single progress spin in milliseconds. */
+    /**
+     * The duration of a single progress spin in milliseconds.
+     */
     private static final int ANIMATION_DURATION = 1000 * 80 / 60;
 
-    /** The number of points in the progress "star". */
+    /**
+     * The number of points in the progress "star".
+     */
     private static final float NUM_POINTS = 5f;
-    /** The list of animators operating on this drawable. */
+    /**
+     * The list of animators operating on this drawable.
+     */
     private final ArrayList<Animation> mAnimators = new ArrayList<Animation>();
 
-    /** The indicator ring, used to manage animation state. */
+    /**
+     * The indicator ring, used to manage animation state.
+     */
     private final Ring mRing;
 
-    /** Canvas rotation in degrees. */
+    /**
+     * Canvas rotation in degrees.
+     */
     private float mRotation;
 
-    /** Layout info for the arrowhead in dp */
+    /**
+     * Layout info for the arrowhead in dp
+     */
     private static final int ARROW_WIDTH = 10;
     private static final int ARROW_HEIGHT = 5;
     private static final float ARROW_OFFSET_ANGLE = 5;
 
-    /** Layout info for the arrowhead for the large spinner in dp */
+    /**
+     * Layout info for the arrowhead for the large spinner in dp
+     */
     private static final int ARROW_WIDTH_LARGE = 12;
     private static final int ARROW_HEIGHT_LARGE = 6;
     private static final float MAX_PROGRESS_ARC = .8f;
+
+    /**
+     * Circle Drawable *
+     */
+    private static final int KEY_SHADOW_COLOR = 0x1E000000;
+    private static final int FILL_SHADOW_COLOR = 0x3D000000;
+    // PX
+    private static final float X_OFFSET = 0f;
+    private static final float Y_OFFSET = 1.75f;
+    private static final float SHADOW_RADIUS = 3.5f;
+    private static final int SHADOW_ELEVATION = 4;
 
     private Resources mResources;
     private View mParent;
@@ -109,6 +146,9 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     private double mWidth;
     private double mHeight;
     private Animation mFinishAnimation;
+    private int mShadowRadius;
+    private int mPadding;
+    private ShapeDrawable mCircle;
 
     public MaterialProgressDrawable(Context context, PullRefreshLayout parent) {
         super(context, parent);
@@ -120,10 +160,58 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
         updateSizes(DEFAULT);
         setupAnimators();
+        createCircleDrawable();
+    }
+
+    private void createCircleDrawable() {
+        float radius = CIRCLE_DIAMETER / 2;
+        final float density = getContext().getResources().getDisplayMetrics().density;
+        final int diameter = (int) (radius * density * 2);
+        final int shadowYOffset = (int) (density * Y_OFFSET);
+        final int shadowXOffset = (int) (density * X_OFFSET);
+
+        mShadowRadius = (int) (density * SHADOW_RADIUS);
+
+        OvalShape oval = new OvalShadow(mShadowRadius, diameter);
+        mCircle = new ShapeDrawable(oval);
+//        ViewCompat.setLayerType(this, ViewCompat.LAYER_TYPE_SOFTWARE, circle.getPaint());
+        mCircle.getPaint().setShadowLayer(mShadowRadius, shadowXOffset, shadowYOffset,
+                KEY_SHADOW_COLOR);
+        mPadding = (int) mShadowRadius;
+
+        mCircle.getPaint().setColor(Color.WHITE);
+    }
+
+    private class OvalShadow extends OvalShape {
+        private RadialGradient mRadialGradient;
+        private int mShadowRadius;
+        private Paint mShadowPaint;
+        private int mCircleDiameter;
+
+        public OvalShadow(int shadowRadius, int circleDiameter) {
+            super();
+            mShadowPaint = new Paint();
+            mShadowRadius = shadowRadius;
+            mCircleDiameter = circleDiameter;
+            mRadialGradient = new RadialGradient(mCircleDiameter / 2, mCircleDiameter / 2,
+                    mShadowRadius, new int[] {
+                    FILL_SHADOW_COLOR, Color.TRANSPARENT
+            }, null, Shader.TileMode.CLAMP);
+            mShadowPaint.setShader(mRadialGradient);
+        }
+
+        @Override
+        public void draw(Canvas canvas, Paint paint) {
+            final int x = MaterialProgressDrawable.this.getBounds().centerX();
+            final int y = MaterialProgressDrawable.this.getBounds().centerY();
+            canvas.drawCircle(x, y, (mCircleDiameter / 2 + mShadowRadius),
+                    mShadowPaint);
+            canvas.drawCircle(x, y, (mCircleDiameter / 2), paint);
+        }
     }
 
     private void setSizeParameters(double progressCircleWidth, double progressCircleHeight,
-            double centerRadius, double strokeWidth, float arrowWidth, float arrowHeight) {
+                                   double centerRadius, double strokeWidth, float arrowWidth, float arrowHeight) {
         final Ring ring = mRing;
         final DisplayMetrics metrics = mResources.getDisplayMetrics();
         final float screenDensity = metrics.density;
@@ -140,7 +228,6 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     /**
      * Set the overall size for the progress spinner. This updates the radius
      * and stroke width of the ring.
-     *
      */
     public void updateSizes(@ProgressDrawableSize int size) {
         if (size == LARGE) {
@@ -170,7 +257,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
      * Set the start and end trim for the progress spinner arc.
      *
      * @param startAngle start angle
-     * @param endAngle end angle
+     * @param endAngle   end angle
      */
     public void setStartEndTrim(float startAngle, float endAngle) {
         mRing.setStartTrim(startAngle);
@@ -191,13 +278,19 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
      */
     public void setBackgroundColor(int color) {
         mRing.setBackgroundColor(color);
-     }
+    }
 
     @Override
     public void setPercent(float percent) {
 //        this.setStartEndTrim(0, 360 * percent);
+        setAlpha(MAX_ALPHA);
+        setBackgroundColor(CIRCLE_BG_LIGHT);
         showArrow(true);
-        setProgressRotation(percent);
+        float strokeStart = (float) (percent * .8f);
+        setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, strokeStart));
+        setArrowScale(Math.min(1f, percent));
+        float rotation = (-0.25f + .4f * percent + percent * 2) * .5f;
+        setProgressRotation(rotation);
     }
 
     /**
@@ -216,26 +309,23 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     public void offsetTopAndBottom(int offset) {
 
     }
-
-    @Override
-    public int getIntrinsicHeight() {
-        return (int) mHeight;
-    }
-
-    @Override
-    public int getIntrinsicWidth() {
-        return (int) mWidth;
-    }
+//
+//    @Override
+//    public int getIntrinsicHeight() {
+//        return (int) mHeight;
+//    }
+//
+//    @Override
+//    public int getIntrinsicWidth() {
+//        return (int) mWidth;
+//    }
 
     @Override
     public void draw(Canvas c) {
-        mWidth = dp2px(40);
         Rect bounds = getBounds();
-        int left = (int) (bounds.width() / 2 - mWidth / 2);
-        int right = (int) (bounds.width() / 2 + mWidth / 2);
-        int bottom = (int) (bounds.top + mHeight);
-        bounds = new Rect(left, bounds.top, right, bottom);
+        mCircle.draw(c);
         final int saveCount = c.save();
+//        c.scale((float)mWidth / bounds.width(), (float)mHeight / bounds.height());
         c.rotate(mRotation, bounds.exactCenterX(), bounds.exactCenterY());
         mRing.draw(c, bounds);
         c.restoreToCount(saveCount);
@@ -244,9 +334,18 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-        mWidth = dp2px(40);
-        mHeight = mWidth;
 
+    }
+
+    @Override
+    public void setBounds(int left, int top, int right, int bottom) {
+        int diameter = dp2px(40);
+
+        int w = right - left;
+
+        super.setBounds(w / 2 - diameter / 2, top, w / 2 + diameter / 2, diameter + top);
+
+//        super.setBounds(left, top, right, bottom);
     }
 
     private int dp2px(int dp) {
@@ -338,7 +437,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
             }
         };
         finishRingAnimation.setInterpolator(EASE_INTERPOLATOR);
-        finishRingAnimation.setDuration(ANIMATION_DURATION/2);
+        finishRingAnimation.setDuration(ANIMATION_DURATION / 2);
         finishRingAnimation.setAnimationListener(new Animation.AnimationListener() {
 
             @Override
@@ -376,7 +475,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
                 final float startTrim = startingTrim
                         + (MAX_PROGRESS_ARC * END_CURVE_INTERPOLATOR
-                                .getInterpolation(interpolatedTime));
+                        .getInterpolation(interpolatedTime));
                 ring.setStartTrim(startTrim);
 
                 final float rotation = startingRotation + (0.25f * interpolatedTime);
@@ -481,7 +580,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
         /**
          * Set the dimensions of the arrowhead.
          *
-         * @param width Width of the hypotenuse of the arrow head
+         * @param width  Width of the hypotenuse of the arrow head
          * @param height Height of the arrow point
          */
         public void setArrowDimensions(float width, float height) {
@@ -503,6 +602,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
             mPaint.setColor(mColors[mColorIndex]);
             c.drawArc(arcBounds, startAngle, sweepAngle, false, mPaint);
+            Log.i("byz", arcBounds.toShortString());
 
             drawTriangle(c, startAngle, sweepAngle, bounds);
 
@@ -560,7 +660,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
         /**
          * @param index Index into the color array of the color to display in
-         *            the progress spinner.
+         *              the progress spinner.
          */
         public void setColorIndex(int index) {
             mColorIndex = index;
@@ -666,7 +766,7 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
         /**
          * @param centerRadius Inner radius in px of the circle the progress
-         *            spinner arc traces.
+         *                     spinner arc traces.
          */
         public void setCenterRadius(double centerRadius) {
             mRingCenterRadius = centerRadius;

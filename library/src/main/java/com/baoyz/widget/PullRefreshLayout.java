@@ -91,7 +91,7 @@ public class PullRefreshLayout extends ViewGroup {
         setRefreshing(false);
         switch (type){
             case STYLE_CIRCLES:
-                mRefreshDrawable = new CirclesDrawable(getContext(), this);
+                mRefreshDrawable = new MaterialProgressDrawable(getContext(), this);
                 break;
             case STYLE_WATER_DROP:
                 mRefreshDrawable = new WaterDropDrawable(getContext(), this);

@@ -9,12 +9,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.baoyz.widget.PullRefreshLayout;
 
-public class DemoActivity extends Activity {
+public class RecyclerViewActivity extends Activity {
 
     PullRefreshLayout layout;
 
@@ -24,18 +23,13 @@ public class DemoActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
 
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         String[] array = new String[50];
         for (int i = 0; i < array.length; i++) {
             array[i] = "string " + i;
         }
-
-        ListView listView = (ListView) findViewById(R.id.listView);
-//        listView.setAdapter(new android.widget.ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, array));
-
-//        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-//        recyclerView.setAdapter(new ArrayAdapter(this, array));
+        recyclerView.setAdapter(new ArrayAdapter(this, array));
 
         layout = (PullRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {

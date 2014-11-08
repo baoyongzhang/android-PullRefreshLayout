@@ -30,12 +30,7 @@ public class DemoActivity extends Activity {
         }
 
         ListView listView = (ListView) findViewById(R.id.listView);
-//        listView.setAdapter(new android.widget.ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, array));
-
-//        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-//        recyclerView.setAdapter(new ArrayAdapter(this, array));
+        listView.setAdapter(new android.widget.ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, array));
 
         layout = (PullRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
@@ -99,6 +94,9 @@ public class DemoActivity extends Activity {
         int id = item.getItemId();
 
         switch (id){
+            case R.id.action_material:
+                layout.setRefreshStyle(PullRefreshLayout.STYLE_MATERIAL);
+                return true;
             case R.id.action_circles:
                 layout.setRefreshStyle(PullRefreshLayout.STYLE_CIRCLES);
                 return true;

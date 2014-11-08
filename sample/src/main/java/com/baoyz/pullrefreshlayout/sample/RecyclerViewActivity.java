@@ -93,6 +93,9 @@ public class RecyclerViewActivity extends Activity {
         int id = item.getItemId();
 
         switch (id){
+            case R.id.action_material:
+                layout.setRefreshStyle(PullRefreshLayout.STYLE_MATERIAL);
+                return true;
             case R.id.action_circles:
                 layout.setRefreshStyle(PullRefreshLayout.STYLE_CIRCLES);
                 return true;

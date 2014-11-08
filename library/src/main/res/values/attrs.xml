@@ -2,9 +2,10 @@
 <resources>
     <declare-styleable name="PullRefreshLayout">
         <attr name="type" format="enum">
-            <enum name="circles" value="0" />
-            <enum name="water_drop" value="1" />
-            <enum name="ring" value="2" />
+            <enum name="material" value="0" />
+            <enum name="circles" value="1" />
+            <enum name="water_drop" value="2" />
+            <enum name="ring" value="3" />
         </attr>
         <attr name="colors" format="reference"/>
     </declare-styleable>

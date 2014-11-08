@@ -20,7 +20,6 @@ import android.graphics.RadialGradient;
 import android.graphics.Shader;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
-import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -33,7 +32,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
@@ -56,7 +54,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
-class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
+class MaterialDrawable extends RefreshDrawable implements Animatable {
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
     private static final Interpolator END_CURVE_INTERPOLATOR = new EndCurveInterpolator();
     private static final Interpolator START_CURVE_INTERPOLATOR = new StartCurveInterpolator();
@@ -149,8 +147,10 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     private int mShadowRadius;
     private int mPadding;
     private ShapeDrawable mCircle;
+    private int mTop;
+    private int mDiameter;
 
-    public MaterialProgressDrawable(Context context, PullRefreshLayout parent) {
+    public MaterialDrawable(Context context, PullRefreshLayout parent) {
         super(context, parent);
         mParent = parent;
         mResources = context.getResources();
@@ -161,6 +161,9 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
         updateSizes(DEFAULT);
         setupAnimators();
         createCircleDrawable();
+        setBackgroundColor(CIRCLE_BG_LIGHT);
+        mDiameter = dp2px(40);
+        mTop = -mDiameter - (getRefreshLayout().getFinalOffset() - mDiameter) / 2;
     }
 
     private void createCircleDrawable() {
@@ -202,8 +205,8 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
         @Override
         public void draw(Canvas canvas, Paint paint) {
-            final int x = MaterialProgressDrawable.this.getBounds().centerX();
-            final int y = MaterialProgressDrawable.this.getBounds().centerY();
+            final int x = MaterialDrawable.this.getBounds().centerX();
+            final int y = MaterialDrawable.this.getBounds().centerY();
             canvas.drawCircle(x, y, (mCircleDiameter / 2 + mShadowRadius),
                     mShadowPaint);
             canvas.drawCircle(x, y, (mCircleDiameter / 2), paint);
@@ -282,11 +285,12 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
     @Override
     public void setPercent(float percent) {
-//        this.setStartEndTrim(0, 360 * percent);
-        setAlpha(MAX_ALPHA);
-        setBackgroundColor(CIRCLE_BG_LIGHT);
+        if (percent < 0.4f)
+            return;
+        percent = (percent - 0.4f) / 0.6f;
+        setAlpha((int) (MAX_ALPHA * percent));
         showArrow(true);
-        float strokeStart = (float) (percent * .8f);
+        float strokeStart = ((percent) * .8f);
         setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, strokeStart));
         setArrowScale(Math.min(1f, percent));
         float rotation = (-0.25f + .4f * percent + percent * 2) * .5f;
@@ -307,7 +311,8 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
     @Override
     public void offsetTopAndBottom(int offset) {
-
+        mTop += offset;
+        invalidateSelf();
     }
 //
 //    @Override
@@ -323,8 +328,10 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
     @Override
     public void draw(Canvas c) {
         Rect bounds = getBounds();
-        mCircle.draw(c);
         final int saveCount = c.save();
+        Log.i("byz", "top = " + mTop);
+        c.translate(0, mTop);
+        mCircle.draw(c);
 //        c.scale((float)mWidth / bounds.width(), (float)mHeight / bounds.height());
         c.rotate(mRotation, bounds.exactCenterX(), bounds.exactCenterY());
         mRing.draw(c, bounds);
@@ -339,13 +346,8 @@ class MaterialProgressDrawable extends RefreshDrawable implements Animatable {
 
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
-        int diameter = dp2px(40);
-
         int w = right - left;
-
-        super.setBounds(w / 2 - diameter / 2, top, w / 2 + diameter / 2, diameter + top);
-
-//        super.setBounds(left, top, right, bottom);
+        super.setBounds(w / 2 - mDiameter / 2, top, w / 2 + mDiameter / 2, mDiameter + top);
     }
 
     private int dp2px(int dp) {

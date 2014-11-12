@@ -46,7 +46,7 @@ layout.setRefreshing(false);
 
 ```
 
-Change the refresh style, there are four styles of use, `Material`、`CIRCLES`、 `WATER_DROP` and `RING`.  
+Change the refresh style, there are four styles of use, `MATERIAL`、`CIRCLES`、 `WATER_DROP` and `RING`.  
 
 In java, call `setRefreshStyle` method.
 

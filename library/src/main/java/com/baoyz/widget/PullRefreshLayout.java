@@ -29,9 +29,10 @@ public class PullRefreshLayout extends ViewGroup {
     private static final int INVALID_POINTER = -1;
     private static final float DRAG_RATE = .5f;
 
-    public static final int STYLE_CIRCLES = 0;
-    public static final int STYLE_WATER_DROP = 1;
-    public static final int STYLE_RING = 2;
+    public static final int STYLE_MATERIAL = 0;
+    public static final int STYLE_CIRCLES = 1;
+    public static final int STYLE_WATER_DROP = 2;
+    public static final int STYLE_RING = 3;
     public static final int MODE_TOP = 0;
     public static final int MODE_BOTTOM = 1;
 
@@ -61,7 +62,7 @@ public class PullRefreshLayout extends ViewGroup {
     public PullRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullRefreshLayout);
-        final int type = a.getInteger(R.styleable.PullRefreshLayout_type, STYLE_CIRCLES);
+        final int type = a.getInteger(R.styleable.PullRefreshLayout_type, STYLE_MATERIAL);
         final int colorsId = a.getResourceId(R.styleable.PullRefreshLayout_colors, R.array.google_colors);
         a.recycle();
 
@@ -90,6 +91,9 @@ public class PullRefreshLayout extends ViewGroup {
     public void setRefreshStyle(int type){
         setRefreshing(false);
         switch (type){
+            case STYLE_MATERIAL:
+                mRefreshDrawable = new MaterialDrawable(getContext(), this);
+                break;
             case STYLE_CIRCLES:
                 mRefreshDrawable = new CirclesDrawable(getContext(), this);
                 break;

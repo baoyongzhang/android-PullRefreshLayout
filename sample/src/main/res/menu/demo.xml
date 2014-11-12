@@ -1,6 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".DemoActivity" >
+    <item android:id="@+id/action_material"
+        android:title="Material"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+    
     <item android:id="@+id/action_circles"
         android:title="Circles"
         android:orderInCategory="100"

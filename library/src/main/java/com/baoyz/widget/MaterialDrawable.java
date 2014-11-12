@@ -329,7 +329,6 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     public void draw(Canvas c) {
         Rect bounds = getBounds();
         final int saveCount = c.save();
-        Log.i("byz", "top = " + mTop);
         c.translate(0, mTop);
         mCircle.draw(c);
 //        c.scale((float)mWidth / bounds.width(), (float)mHeight / bounds.height());
@@ -604,7 +603,6 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 
             mPaint.setColor(mColors[mColorIndex]);
             c.drawArc(arcBounds, startAngle, sweepAngle, false, mPaint);
-            Log.i("byz", arcBounds.toShortString());
 
             drawTriangle(c, startAngle, sweepAngle, bounds);
 

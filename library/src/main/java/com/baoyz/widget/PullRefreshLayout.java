@@ -322,6 +322,7 @@ public class PullRefreshLayout extends ViewGroup {
             ensureTarget();
             mRefreshing = refreshing;
             if (mRefreshing) {
+                mRefreshDrawable.setPercent(1f);
                 animateOffsetToCorrectPosition();
             } else {
                 animateOffsetToStartPosition();

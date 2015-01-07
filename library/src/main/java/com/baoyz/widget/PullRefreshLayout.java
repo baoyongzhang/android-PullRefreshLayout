@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -83,14 +84,14 @@ public class PullRefreshLayout extends ViewGroup {
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
     }
 
-    public void setColorSchemeColors(int[] colorSchemeColors){
+    public void setColorSchemeColors(int[] colorSchemeColors) {
         mColorSchemeColors = colorSchemeColors;
         mRefreshDrawable.setColorSchemeColors(colorSchemeColors);
     }
 
-    public void setRefreshStyle(int type){
+    public void setRefreshStyle(int type) {
         setRefreshing(false);
-        switch (type){
+        switch (type) {
             case STYLE_MATERIAL:
                 mRefreshDrawable = new MaterialDrawable(getContext(), this);
                 break;
@@ -110,7 +111,7 @@ public class PullRefreshLayout extends ViewGroup {
         mRefreshView.setImageDrawable(mRefreshDrawable);
     }
 
-    public int getFinalOffset(){
+    public int getFinalOffset() {
         return mSpinnerFinalOffset;
     }
 
@@ -143,6 +144,9 @@ public class PullRefreshLayout extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+        if (mRefreshing)
+            return onInterceptRefreshingTouchEvent(ev);
 
         if (!isEnabled() || canChildScrollUp() || mRefreshing) {
             return false;
@@ -191,8 +195,72 @@ public class PullRefreshLayout extends ViewGroup {
         return mIsBeingDragged;
     }
 
+    private boolean onInterceptRefreshingTouchEvent(MotionEvent ev) {
+        final int action = MotionEventCompat.getActionMasked(ev);
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mIsBeingDragged = false;
+                mInitialMotionY = ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (canChildScrollDown()) {
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mIsBeingDragged = false;
+                mActivePointerId = INVALID_POINTER;
+                break;
+            case MotionEventCompat.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
+                break;
+        }
+        return true;
+    }
+
+    private boolean onRefreshingTouchEvent(MotionEvent ev) {
+
+
+        final int action = MotionEventCompat.getActionMasked(ev);
+
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mTarget.dispatchTouchEvent(ev);
+                break;
+            case MotionEvent.ACTION_MOVE: {
+                int offsetY = (int) (ev.getY() - mInitialMotionY);
+                mInitialMotionY = ev.getY();
+                if (mCurrentOffsetTop > mTotalDragDistance && offsetY > 0) {
+                    break;
+                }
+                if (mCurrentOffsetTop <= 0 && offsetY < 0) {
+                    ev.offsetLocation(0, mTotalDragDistance);
+                    mTarget.dispatchTouchEvent(ev);
+                    break;
+                }
+                Log.i("byz", "scrollY = " + mTarget.getScrollY() + ", paddingTop = " + mTarget.getPaddingTop());
+                if (mTarget.getScrollY() == 0){
+                    setTargetOffsetTop(offsetY, true);
+                }else{
+
+                    mTarget.dispatchTouchEvent(ev);
+                }
+                break;
+            }
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mTarget.dispatchTouchEvent(ev);
+                break;
+        }
+        return true;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        if (mRefreshing)
+            return onRefreshingTouchEvent(ev);
 
         if (!mIsBeingDragged) {
             return super.onTouchEvent(ev);
@@ -419,18 +487,18 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private boolean canChildScrollDown() {
-        if (android.os.Build.VERSION.SDK_INT < 14) {
-            if (mTarget instanceof AbsListView) {
-                final AbsListView absListView = (AbsListView) mTarget;
-                return absListView.getChildCount() > 0
-                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
-                        .getTop() < absListView.getPaddingTop());
-            } else {
-                return mTarget.getScrollY() > 0;
-            }
+//        if (android.os.Build.VERSION.SDK_INT < 14) {
+        if (mTarget instanceof AbsListView) {
+            final AbsListView absListView = (AbsListView) mTarget;
+            return absListView.getChildCount() > 0
+                    && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
+                    .getTop() >= absListView.getPaddingTop());
         } else {
-            return ViewCompat.canScrollVertically(mTarget, -1);
+            return mTarget.getScrollY() <= 0;
         }
+//        } else {
+//            return ViewCompat.canScrollVertically(mTarget, -1);
+//        }
     }
 
     @Override

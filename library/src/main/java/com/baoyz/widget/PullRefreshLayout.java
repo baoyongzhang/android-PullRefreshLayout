@@ -110,6 +110,13 @@ public class PullRefreshLayout extends ViewGroup {
         mRefreshView.setImageDrawable(mRefreshDrawable);
     }
 
+    public void setRefreshDrawable(RefreshDrawable drawable){
+        setRefreshing(false);
+        mRefreshDrawable = drawable;
+        mRefreshDrawable.setColorSchemeColors(mColorSchemeColors);
+        mRefreshView.setImageDrawable(mRefreshDrawable);
+    }
+
     public int getFinalOffset(){
         return mSpinnerFinalOffset;
     }

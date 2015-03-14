@@ -12,6 +12,14 @@ This component like SwipeRefreshLayout, it is more beautiful than SwipeRefreshLa
 
 # Usage
 
+Add dependency.
+
+```
+dependencies {
+    compile 'com.baoyz.pullrefreshlayout:library:1.0.1'
+}
+```
+
 Use method like SwipeRefreshLayout's usage.  
 
 Use it in your layout xml.

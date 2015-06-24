@@ -40,7 +40,6 @@ public class PullRefreshLayout extends ViewGroup {
     private ImageView mRefreshView;
     private Interpolator mDecelerateInterpolator;
     private int mTouchSlop;
-    private int mMediumAnimationDuration;
     private int mSpinnerFinalOffset;
     private int mTotalDragDistance;
     private RefreshDrawable mRefreshDrawable;
@@ -55,6 +54,9 @@ public class PullRefreshLayout extends ViewGroup {
     private int[] mColorSchemeColors;
     private int mMode;
 
+    public int mDurationToStartPosition;
+    public int mDurationToCorrectPosition;
+
     public PullRefreshLayout(Context context) {
         this(context, null);
     }
@@ -68,8 +70,9 @@ public class PullRefreshLayout extends ViewGroup {
 
         mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        mMediumAnimationDuration = getResources().getInteger(
-                android.R.integer.config_mediumAnimTime);
+        int defaultDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        mDurationToStartPosition = defaultDuration;
+        mDurationToCorrectPosition = defaultDuration;
         mSpinnerFinalOffset = mTotalDragDistance = dp2px(DRAG_MAX_DISTANCE);
 
         mRefreshView = new ImageView(context);
@@ -272,11 +275,15 @@ public class PullRefreshLayout extends ViewGroup {
         return true;
     }
 
+    public void setDurations(int durationToStartPosition, int durationToCorrectPosition) {
+        mDurationToStartPosition = durationToStartPosition;
+        mDurationToCorrectPosition = durationToCorrectPosition;
+    }
 
     private void animateOffsetToStartPosition() {
         mFrom = mCurrentOffsetTop;
         mAnimateToStartPosition.reset();
-        mAnimateToStartPosition.setDuration(mMediumAnimationDuration);
+        mAnimateToStartPosition.setDuration(mDurationToStartPosition);
         mAnimateToStartPosition.setInterpolator(mDecelerateInterpolator);
         mAnimateToStartPosition.setAnimationListener(mToStartListener);
         mRefreshView.clearAnimation();
@@ -286,7 +293,7 @@ public class PullRefreshLayout extends ViewGroup {
     private void animateOffsetToCorrectPosition() {
         mFrom = mCurrentOffsetTop;
         mAnimateToCorrectPosition.reset();
-        mAnimateToCorrectPosition.setDuration(mMediumAnimationDuration);
+        mAnimateToCorrectPosition.setDuration(mDurationToCorrectPosition);
         mAnimateToCorrectPosition.setInterpolator(mDecelerateInterpolator);
         mAnimateToCorrectPosition.setAnimationListener(mRefreshListener);
         mRefreshView.clearAnimation();

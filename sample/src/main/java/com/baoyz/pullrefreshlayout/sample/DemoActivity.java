@@ -41,7 +41,7 @@ public class DemoActivity extends Activity {
                     public void run() {
                         layout.setRefreshing(false);
                     }
-                }, 4000);
+                }, 10000);
             }
         });
     }

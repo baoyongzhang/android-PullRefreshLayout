@@ -16,17 +16,6 @@
 
 package com.baoyz.widget;
 
-import android.graphics.RadialGradient;
-import android.graphics.Shader;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Interpolator;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.Transformation;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -36,14 +25,24 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
+import android.graphics.Shader;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.Transformation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -329,7 +328,6 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     public void draw(Canvas c) {
         Rect bounds = getBounds();
         final int saveCount = c.save();
-        Log.i("byz", "top = " + mTop);
         c.translate(0, mTop);
         mCircle.draw(c);
 //        c.scale((float)mWidth / bounds.width(), (float)mHeight / bounds.height());
@@ -604,7 +602,6 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 
             mPaint.setColor(mColors[mColorIndex]);
             c.drawArc(arcBounds, startAngle, sweepAngle, false, mPaint);
-            Log.i("byz", arcBounds.toShortString());
 
             drawTriangle(c, startAngle, sweepAngle, bounds);
 

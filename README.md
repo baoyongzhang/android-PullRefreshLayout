@@ -1,6 +1,8 @@
 android-PullRefreshLayout
 =========================
 
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-android--PullRefreshLayout-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/1084)
+
 This component like SwipeRefreshLayout, it is more beautiful than SwipeRefreshLayout.
 
 # Demo
@@ -9,6 +11,14 @@ This component like SwipeRefreshLayout, it is more beautiful than SwipeRefreshLa
 </p>
 
 # Usage
+
+Add dependency.
+
+```
+dependencies {
+    compile 'com.baoyz.pullrefreshlayout:library:1.0.1'
+}
+```
 
 Use method like SwipeRefreshLayout's usage.  
 
@@ -44,7 +54,7 @@ layout.setRefreshing(false);
 
 ```
 
-Change the refresh style, there are tree styles of use, `CIRCLES`、 `WATER_DROP` and `RING`.  
+Change the refresh style, there are four styles of use, `MATERIAL`、`CIRCLES`、 `WATER_DROP` and `RING`.  
 
 In java, call `setRefreshStyle` method.
 

@@ -5,15 +5,14 @@ android {
     buildToolsVersion "21.0.2"
 
     defaultConfig {
-        applicationId "com.baoyz.widget"
-        minSdkVersion 15
+        minSdkVersion 8
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

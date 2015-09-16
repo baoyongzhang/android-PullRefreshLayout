@@ -56,6 +56,7 @@ public class PullRefreshLayout extends ViewGroup {
     public int mDurationToStartPosition;
     public int mDurationToCorrectPosition;
     private int mInitialOffsetTop;
+    private boolean mDispatchTargetTouchDown;
 
     public PullRefreshLayout(Context context) {
         this(context, null);
@@ -173,6 +174,7 @@ public class PullRefreshLayout extends ViewGroup {
                 }
                 mInitialMotionY = initialMotionY;
                 mInitialOffsetTop = mCurrentOffsetTop;
+                mDispatchTargetTouchDown = false;
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mActivePointerId == INVALID_POINTER) {
@@ -224,6 +226,14 @@ public class PullRefreshLayout extends ViewGroup {
                 if (mRefreshing) {
                     targetY = (int) (mInitialOffsetTop + yDiff);
                     if (targetY < 0) {
+                        if (mDispatchTargetTouchDown) {
+                            mTarget.dispatchTouchEvent(ev);
+                        } else {
+                            MotionEvent obtain = MotionEvent.obtain(ev);
+                            obtain.setAction(MotionEvent.ACTION_DOWN);
+                            mDispatchTargetTouchDown = true;
+                            mTarget.dispatchTouchEvent(obtain);
+                        }
                         targetY = 0;
                     } else if (targetY > mTotalDragDistance) {
                         targetY = mTotalDragDistance;
@@ -262,7 +272,14 @@ public class PullRefreshLayout extends ViewGroup {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
-                if (mActivePointerId == INVALID_POINTER || mRefreshing) {
+                if (mActivePointerId == INVALID_POINTER) {
+                    return false;
+                }
+                if (mRefreshing) {
+                    if (mDispatchTargetTouchDown) {
+                        mTarget.dispatchTouchEvent(ev);
+                        mDispatchTargetTouchDown = false;
+                    }
                     return false;
                 }
                 final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);

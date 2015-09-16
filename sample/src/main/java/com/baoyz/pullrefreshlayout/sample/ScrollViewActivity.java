@@ -29,6 +29,8 @@ public class ScrollViewActivity extends Activity {
                 }, 3000);
             }
         });
+
+        layout.setRefreshDrawable(new ArcDrawable(this, layout));
     }
 
 }

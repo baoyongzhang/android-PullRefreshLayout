@@ -3,17 +3,17 @@ package com.baoyz.pullrefreshlayout.sample;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.baoyz.widget.PullRefreshLayout;
 
-public class RecyclerViewActivity extends Activity {
+public class ListViewActivity extends Activity {
 
     PullRefreshLayout layout;
 
@@ -21,15 +21,15 @@ public class RecyclerViewActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recycler_view);
+        setContentView(R.layout.activity_list_view);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         String[] array = new String[50];
         for (int i = 0; i < array.length; i++) {
             array[i] = "string " + i;
         }
-        recyclerView.setAdapter(new ArrayAdapter(this, array));
+
+        final ListView listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(new android.widget.ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, array));
 
         layout = (PullRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
@@ -40,9 +40,10 @@ public class RecyclerViewActivity extends Activity {
                     public void run() {
                         layout.setRefreshing(false);
                     }
-                }, 4000);
+                }, 3000);
             }
         });
+
     }
 
     static class ArrayAdapter extends RecyclerView.Adapter<ViewHolder>{

@@ -53,7 +53,6 @@ public class PullRefreshLayout extends ViewGroup {
     private boolean mNotify;
     private OnRefreshListener mListener;
     private int[] mColorSchemeColors;
-    private int mMode;
 
     public int mDurationToStartPosition;
     public int mDurationToCorrectPosition;

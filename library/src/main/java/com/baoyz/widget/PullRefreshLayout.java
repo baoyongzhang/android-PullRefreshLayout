@@ -2,6 +2,8 @@ package com.baoyz.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -57,6 +59,7 @@ public class PullRefreshLayout extends ViewGroup {
     public int mDurationToCorrectPosition;
     private int mInitialOffsetTop;
     private boolean mDispatchTargetTouchDown;
+    private float mDragPercent;
 
     public PullRefreshLayout(Context context) {
         this(context, null);
@@ -81,8 +84,7 @@ public class PullRefreshLayout extends ViewGroup {
         setRefreshStyle(type);
 //        mRefreshDrawable.setColorSchemeColors(new int[]{Color.rgb(0xC9, 0x34, 0x37), Color.rgb(0x37, 0x5B, 0xF1), Color.rgb(0xF7, 0xD2, 0x3E), Color.rgb(0x34, 0xA3, 0x50)});
         mRefreshView.setVisibility(View.GONE);
-        addView(mRefreshView);
-
+        addView(mRefreshView, 0);
         setWillNotDraw(false);
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
     }
@@ -175,6 +177,7 @@ public class PullRefreshLayout extends ViewGroup {
                 mInitialMotionY = initialMotionY;
                 mInitialOffsetTop = mCurrentOffsetTop;
                 mDispatchTargetTouchDown = false;
+                mDragPercent = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mActivePointerId == INVALID_POINTER) {
@@ -244,7 +247,7 @@ public class PullRefreshLayout extends ViewGroup {
                     if (originalDragPercent < 0) {
                         return false;
                     }
-                    float dragPercent = Math.min(1f, Math.abs(originalDragPercent));
+                    mDragPercent = Math.min(1f, Math.abs(originalDragPercent));
                     float extraOS = Math.abs(scrollTop) - mTotalDragDistance;
                     float slingshotDist = mSpinnerFinalOffset;
                     float tensionSlingshotPercent = Math.max(0,
@@ -252,12 +255,12 @@ public class PullRefreshLayout extends ViewGroup {
                     float tensionPercent = (float) ((tensionSlingshotPercent / 4) - Math.pow(
                             (tensionSlingshotPercent / 4), 2)) * 2f;
                     float extraMove = (slingshotDist) * tensionPercent * 2;
-                    targetY = (int) ((slingshotDist * dragPercent) + extraMove);
+                    targetY = (int) ((slingshotDist * mDragPercent) + extraMove);
                     if (mRefreshView.getVisibility() != View.VISIBLE) {
                         mRefreshView.setVisibility(View.VISIBLE);
                     }
                     if (scrollTop < mTotalDragDistance) {
-                        mRefreshDrawable.setPercent(dragPercent);
+                        mRefreshDrawable.setPercent(mDragPercent);
                     }
                 }
                 setTargetOffsetTop(targetY - mCurrentOffsetTop, true);
@@ -335,9 +338,8 @@ public class PullRefreshLayout extends ViewGroup {
     private final Animation mAnimateToCorrectPosition = new Animation() {
         @Override
         public void applyTransformation(float interpolatedTime, Transformation t) {
-            int targetTop = 0;
-            int endTarget = (int) mSpinnerFinalOffset;
-            targetTop = (mFrom + (int) ((endTarget - mFrom) * interpolatedTime));
+            int endTarget = mSpinnerFinalOffset;
+            int targetTop = (mFrom + (int) ((endTarget - mFrom) * interpolatedTime));
             int offset = targetTop - mTarget.getTop();
             setTargetOffsetTop(offset, false /* requires update */);
         }
@@ -347,6 +349,7 @@ public class PullRefreshLayout extends ViewGroup {
         int targetTop = mFrom - (int) (mFrom * interpolatedTime);
         int offset = targetTop - mTarget.getTop();
         setTargetOffsetTop(offset, false);
+        mRefreshDrawable.setPercent(mDragPercent * (1 - interpolatedTime));
     }
 
     public void setRefreshing(boolean refreshing) {
@@ -432,7 +435,7 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private void setTargetOffsetTop(int offset, boolean requiresUpdate) {
-        mRefreshView.bringToFront();
+//        mRefreshView.bringToFront();
         mTarget.offsetTopAndBottom(offset);
         mCurrentOffsetTop = mTarget.getTop();
         mRefreshDrawable.offsetTopAndBottom(offset);
@@ -442,21 +445,6 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     private boolean canChildScrollUp() {
-        if (android.os.Build.VERSION.SDK_INT < 14) {
-            if (mTarget instanceof AbsListView) {
-                final AbsListView absListView = (AbsListView) mTarget;
-                return absListView.getChildCount() > 0
-                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
-                        .getTop() < absListView.getPaddingTop());
-            } else {
-                return mTarget.getScrollY() > 0;
-            }
-        } else {
-            return ViewCompat.canScrollVertically(mTarget, -1);
-        }
-    }
-
-    private boolean canChildScrollDown() {
         if (android.os.Build.VERSION.SDK_INT < 14) {
             if (mTarget instanceof AbsListView) {
                 final AbsListView absListView = (AbsListView) mTarget;

@@ -36,6 +36,7 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -284,15 +285,15 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 
     @Override
     public void setPercent(float percent) {
-        if (percent < 0.4f)
+        if (percent < .4f)
             return;
-        percent = (percent - 0.4f) / 0.6f;
+        percent = (percent - .4f) / .6f;
         setAlpha((int) (MAX_ALPHA * percent));
         showArrow(true);
         float strokeStart = ((percent) * .8f);
         setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, strokeStart));
         setArrowScale(Math.min(1f, percent));
-        float rotation = (-0.25f + .4f * percent + percent * 2) * .5f;
+        float rotation = percent < .8f ? 0 : (percent - .8f) / .2f * .25f;
         setProgressRotation(rotation);
     }
 

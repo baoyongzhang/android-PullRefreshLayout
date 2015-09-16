@@ -1,19 +1,27 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".DemoActivity">
 
-    <com.baoyz.widget.PullRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:text="ListView"
+        android:onClick="onListViewClick"/>
 
-        <ListView
-            android:id="@+id/listView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onRecyclerViewClick"
+        android:text="RecyclerView"/>
 
-    </com.baoyz.widget.PullRefreshLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onScrollViewClick"
+        android:text="ScrollView"/>
 
-</RelativeLayout>
+</LinearLayout>

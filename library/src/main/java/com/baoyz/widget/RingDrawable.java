@@ -13,7 +13,7 @@ import android.util.TypedValue;
 /**
  * Created by baoyz on 14/11/2.
  */
-class RingDrawable extends RefreshDrawable{
+class RingDrawable extends RefreshDrawable {
 
     private static final int MAX_LEVEL = 200;
 
@@ -42,6 +42,7 @@ class RingDrawable extends RefreshDrawable{
     @Override
     public void setPercent(float percent) {
         mPaint.setColor(evaluate(percent, mColorSchemeColors[0], mColorSchemeColors[1]));
+        mAngle = 340 * percent;
     }
 
     @Override
@@ -53,16 +54,6 @@ class RingDrawable extends RefreshDrawable{
     public void offsetTopAndBottom(int offset) {
         mTop += offset;
         mOffsetTop += offset;
-        float offsetTop = mOffsetTop - dp2px(20);
-        if (offsetTop <= 0) {
-            mAngle = 0;
-        }else {
-            int finalOffset = getRefreshLayout().getFinalOffset() - dp2px(20);
-            if (offsetTop > finalOffset) {
-                offsetTop = finalOffset;
-            }
-            mAngle = 340 * (offsetTop / finalOffset);
-        }
         invalidateSelf();
     }
 
@@ -70,22 +61,8 @@ class RingDrawable extends RefreshDrawable{
     public void start() {
         mLevel = 50;
         isRunning = true;
-        mHandler.post(mAnimationTask);
+        invalidateSelf();
     }
-
-    private Runnable mAnimationTask = new Runnable(){
-        @Override
-        public void run() {
-            if (isRunning()){
-                mLevel++;
-                if (mLevel > MAX_LEVEL)
-                    mLevel = 0;
-                updateLevel(mLevel);
-                invalidateSelf();
-                mHandler.postDelayed(this, 20);
-            }
-        }
-    };
 
     private void updateLevel(int level) {
         int animationLevel = level == MAX_LEVEL ? 0 : level;
@@ -103,7 +80,6 @@ class RingDrawable extends RefreshDrawable{
     @Override
     public void stop() {
         isRunning = false;
-        mHandler.removeCallbacks(mAnimationTask);
         mDegress = 0;
     }
 
@@ -128,9 +104,14 @@ class RingDrawable extends RefreshDrawable{
         canvas.rotate(mDegress, mBounds.centerX(), mBounds.centerY());
         drawRing(canvas);
         canvas.restore();
+        if (isRunning) {
+            mLevel = mLevel >= MAX_LEVEL ? 0 : mLevel + 1;
+            updateLevel(mLevel);
+            invalidateSelf();
+        }
     }
 
-    private void drawRing(Canvas canvas){
+    private void drawRing(Canvas canvas) {
         mPath.reset();
         mPath.arcTo(mBounds, 270, mAngle, true);
         canvas.drawPath(mPath, mPaint);

@@ -34,8 +34,6 @@ public class PullRefreshLayout extends ViewGroup {
     public static final int STYLE_CIRCLES = 1;
     public static final int STYLE_WATER_DROP = 2;
     public static final int STYLE_RING = 3;
-    public static final int MODE_TOP = 0;
-    public static final int MODE_BOTTOM = 1;
 
     private View mTarget;
     private ImageView mRefreshView;
@@ -160,11 +158,6 @@ public class PullRefreshLayout extends ViewGroup {
             return false;
         }
 
-//        if (mRefreshing) {
-//            Log.d("byz", "mCurrentOffsetTop " + mCurrentOffsetTop);
-//            return mCurrentOffsetTop > 0;
-//        }
-
         final int action = MotionEventCompat.getActionMasked(ev);
 
         switch (action) {
@@ -190,17 +183,8 @@ public class PullRefreshLayout extends ViewGroup {
                     return false;
                 }
                 final float yDiff = y - mInitialMotionY;
-//                if (Math.abs(yDiff) > mTouchSlop && !mIsBeingDragged) {
-//                    mIsBeingDragged = true;
-//                    mMode = yDiff > 0 ? MODE_TOP : MODE_BOTTOM;
-//                }
                 if (mRefreshing) {
                     mIsBeingDragged = !(yDiff < 0 && mCurrentOffsetTop <= 0);
-//                    if (yDiff > 0) {
-//                        mIsBeingDragged = mCurrentOffsetTop <= 0;
-//                    } else {
-//                        mIsBeingDragged = mCurrentOffsetTop >= 0;
-//                    }
                 } else if (yDiff > mTouchSlop && !mIsBeingDragged) {
                     mIsBeingDragged = true;
                 }
@@ -235,7 +219,6 @@ public class PullRefreshLayout extends ViewGroup {
                 }
 
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-//                final float yDiff = Math.abs(y - mInitialMotionY);
                 final float yDiff = y - mInitialMotionY;
                 int targetY;
                 if (mRefreshing) {
@@ -252,8 +235,6 @@ public class PullRefreshLayout extends ViewGroup {
                         return false;
                     }
                     float dragPercent = Math.min(1f, Math.abs(originalDragPercent));
-//                float adjustedPercent = (float) Math.max(dragPercent - .4, 0) * 5 / 3;
-//                    float adjustedPercent = dragPercent;
                     float extraOS = Math.abs(scrollTop) - mTotalDragDistance;
                     float slingshotDist = mSpinnerFinalOffset;
                     float tensionSlingshotPercent = Math.max(0,
@@ -435,7 +416,6 @@ public class PullRefreshLayout extends ViewGroup {
 
     private void setTargetOffsetTop(int offset, boolean requiresUpdate) {
         mRefreshView.bringToFront();
-//        mRefreshView.offsetTopAndBottom(offset);
         mTarget.offsetTopAndBottom(offset);
         mCurrentOffsetTop = mTarget.getTop();
         mRefreshDrawable.offsetTopAndBottom(offset);
@@ -489,7 +469,6 @@ public class PullRefreshLayout extends ViewGroup {
         int bottom = getPaddingBottom();
 
         mTarget.layout(left, top + mTarget.getTop(), left + width - right, top + height - bottom + mTarget.getTop());
-//        mRefreshView.layout(width / 2 - mRefreshViewWidth / 2, -mRefreshViewHeight + mCurrentOffsetTop, width / 2 + mRefreshViewHeight / 2, mCurrentOffsetTop);
         mRefreshView.layout(left, top, left + width - right, top + height - bottom);
     }
 

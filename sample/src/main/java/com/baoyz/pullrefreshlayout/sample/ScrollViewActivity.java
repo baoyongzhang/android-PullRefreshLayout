@@ -1,11 +1,11 @@
 package com.baoyz.pullrefreshlayout.sample;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 
 import com.baoyz.widget.PullRefreshLayout;
+import com.baoyz.widget.SmartisanDrawable;
 
 public class ScrollViewActivity extends Activity {
 
@@ -29,8 +29,8 @@ public class ScrollViewActivity extends Activity {
                 }, 3000);
             }
         });
-
-        layout.setRefreshDrawable(new ArcDrawable(this, layout));
+        layout.setColorSchemeColors(Color.GRAY);
+        layout.setRefreshDrawable(new SmartisanDrawable(this, layout));
     }
 
 }

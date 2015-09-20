@@ -20,4 +20,9 @@
         android:title="Ring"
         android:orderInCategory="100"
         android:showAsAction="never" />
+
+    <item android:id="@+id/action_smartisan"
+        android:title="Smartisan"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
 </menu>

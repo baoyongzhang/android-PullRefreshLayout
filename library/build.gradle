@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion 21
     buildToolsVersion "21.0.2"
-    resourcePrefix "pullrefreshlayout"
+    resourcePrefix "refresh"
 
     defaultConfig {
         minSdkVersion 8
@@ -28,7 +28,7 @@ dependencies {
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version = "1.1.0"
+version = "2.0.0"
 def siteUrl = 'https://github.com/baoyongzhang/android-PullRefreshLayout'
 def gitUrl = 'https://github.com/baoyongzhang/android-PullRefreshLayout.git'
 group = "com.baoyz.pullrefreshlayout"

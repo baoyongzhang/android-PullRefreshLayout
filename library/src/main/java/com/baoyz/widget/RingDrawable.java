@@ -2,7 +2,6 @@ package com.baoyz.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -21,8 +20,6 @@ class RingDrawable extends RefreshDrawable {
     private RectF mBounds;
     private int mWidth;
     private int mHeight;
-    private int mTop;
-    private int mOffsetTop;
     private Paint mPaint;
     private Path mPath;
     private float mAngle;
@@ -36,6 +33,7 @@ class RingDrawable extends RefreshDrawable {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(dp2px(3));
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPath = new Path();
     }
 
@@ -52,8 +50,6 @@ class RingDrawable extends RefreshDrawable {
 
     @Override
     public void offsetTopAndBottom(int offset) {
-        mTop += offset;
-        mOffsetTop += offset;
         invalidateSelf();
     }
 

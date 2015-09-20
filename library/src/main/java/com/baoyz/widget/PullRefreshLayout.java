@@ -2,12 +2,10 @@ package com.baoyz.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +34,7 @@ public class PullRefreshLayout extends ViewGroup {
     public static final int STYLE_CIRCLES = 1;
     public static final int STYLE_WATER_DROP = 2;
     public static final int STYLE_RING = 3;
+    public static final int STYLE_SMARTISAN = 4;
 
     private View mTarget;
     private ImageView mRefreshView;
@@ -66,9 +65,10 @@ public class PullRefreshLayout extends ViewGroup {
 
     public PullRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.PullRefreshLayout);
-        final int type = a.getInteger(R.styleable.PullRefreshLayout_type, STYLE_MATERIAL);
-        final int colorsId = a.getResourceId(R.styleable.PullRefreshLayout_colors, R.array.google_colors);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.refresh_PullRefreshLayout);
+        final int type = a.getInteger(R.styleable.refresh_PullRefreshLayout_refreshType, STYLE_MATERIAL);
+        final int colorsId = a.getResourceId(R.styleable.refresh_PullRefreshLayout_refreshColors, 0);
+        final int colorId = a.getResourceId(R.styleable.refresh_PullRefreshLayout_refreshColor, 0);
         a.recycle();
 
         mDecelerateInterpolator = new DecelerateInterpolator(DECELERATE_INTERPOLATION_FACTOR);
@@ -78,19 +78,31 @@ public class PullRefreshLayout extends ViewGroup {
         mDurationToCorrectPosition = defaultDuration;
         mSpinnerFinalOffset = mTotalDragDistance = dp2px(DRAG_MAX_DISTANCE);
 
+        if (colorsId > 0) {
+            mColorSchemeColors = context.getResources().getIntArray(colorsId);
+        } else {
+            mColorSchemeColors = new int[]{Color.rgb(0xC9, 0x34, 0x37), Color.rgb(0x37, 0x5B, 0xF1), Color.rgb(0xF7, 0xD2, 0x3E), Color.rgb(0x34, 0xA3, 0x50)};
+        }
+
+        if (colorId > 0) {
+            mColorSchemeColors = new int[]{context.getResources().getColor(colorId)};
+        }
+
         mRefreshView = new ImageView(context);
-        mColorSchemeColors = context.getResources().getIntArray(colorsId);
         setRefreshStyle(type);
-//        mRefreshDrawable.setColorSchemeColors(new int[]{Color.rgb(0xC9, 0x34, 0x37), Color.rgb(0x37, 0x5B, 0xF1), Color.rgb(0xF7, 0xD2, 0x3E), Color.rgb(0x34, 0xA3, 0x50)});
         mRefreshView.setVisibility(View.GONE);
         addView(mRefreshView, 0);
         setWillNotDraw(false);
         ViewCompat.setChildrenDrawingOrderEnabled(this, true);
     }
 
-    public void setColorSchemeColors(int[] colorSchemeColors) {
+    public void setColorSchemeColors(int... colorSchemeColors) {
         mColorSchemeColors = colorSchemeColors;
         mRefreshDrawable.setColorSchemeColors(colorSchemeColors);
+    }
+
+    public void setColor(int color) {
+        setColorSchemeColors(color);
     }
 
     public void setRefreshStyle(int type) {
@@ -107,6 +119,9 @@ public class PullRefreshLayout extends ViewGroup {
                 break;
             case STYLE_RING:
                 mRefreshDrawable = new RingDrawable(getContext(), this);
+                break;
+            case STYLE_SMARTISAN:
+                mRefreshDrawable = new SmartisanDrawable(getContext(), this);
                 break;
             default:
                 throw new InvalidParameterException("Type does not exist");
@@ -402,6 +417,7 @@ public class PullRefreshLayout extends ViewGroup {
     private Animation.AnimationListener mToStartListener = new Animation.AnimationListener() {
         @Override
         public void onAnimationStart(Animation animation) {
+            mRefreshDrawable.stop();
         }
 
         @Override
@@ -410,7 +426,7 @@ public class PullRefreshLayout extends ViewGroup {
 
         @Override
         public void onAnimationEnd(Animation animation) {
-            mRefreshDrawable.stop();
+//            mRefreshDrawable.stop();
             mRefreshView.setVisibility(View.GONE);
             mCurrentOffsetTop = mTarget.getTop();
         }

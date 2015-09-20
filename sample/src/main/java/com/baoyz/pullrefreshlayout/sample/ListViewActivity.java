@@ -106,6 +106,9 @@ public class ListViewActivity extends Activity {
             case R.id.action_ring:
                 layout.setRefreshStyle(PullRefreshLayout.STYLE_RING);
                 return true;
+            case R.id.action_smartisan:
+                layout.setRefreshStyle(PullRefreshLayout.STYLE_SMARTISAN);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

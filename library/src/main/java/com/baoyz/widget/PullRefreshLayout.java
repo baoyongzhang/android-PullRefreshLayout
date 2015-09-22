@@ -219,7 +219,6 @@ public class PullRefreshLayout extends ViewGroup {
         }
 
         return mIsBeingDragged;
-//        return false;
     }
 
     @Override

@@ -171,7 +171,7 @@ public class PullRefreshLayout extends ViewGroup {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
-        if (!isEnabled() || canChildScrollUp()) {
+        if (!isEnabled() || (canChildScrollUp() && !mRefreshing)) {
             return false;
         }
 
@@ -219,6 +219,7 @@ public class PullRefreshLayout extends ViewGroup {
         }
 
         return mIsBeingDragged;
+//        return false;
     }
 
     @Override
@@ -242,7 +243,10 @@ public class PullRefreshLayout extends ViewGroup {
                 int targetY;
                 if (mRefreshing) {
                     targetY = (int) (mInitialOffsetTop + yDiff);
-                    if (targetY < 0) {
+                    if (canChildScrollUp()) {
+                        targetY = -1;
+                        mInitialMotionY = y;
+                        mInitialOffsetTop = 0;
                         if (mDispatchTargetTouchDown) {
                             mTarget.dispatchTouchEvent(ev);
                         } else {
@@ -251,9 +255,27 @@ public class PullRefreshLayout extends ViewGroup {
                             mDispatchTargetTouchDown = true;
                             mTarget.dispatchTouchEvent(obtain);
                         }
-                        targetY = 0;
-                    } else if (targetY > mTotalDragDistance) {
-                        targetY = mTotalDragDistance;
+                    } else {
+                        if (targetY < 0) {
+                            if (mDispatchTargetTouchDown) {
+                                mTarget.dispatchTouchEvent(ev);
+                            } else {
+                                MotionEvent obtain = MotionEvent.obtain(ev);
+                                obtain.setAction(MotionEvent.ACTION_DOWN);
+                                mDispatchTargetTouchDown = true;
+                                mTarget.dispatchTouchEvent(obtain);
+                            }
+                            targetY = 0;
+                        } else if (targetY > mTotalDragDistance) {
+                            targetY = mTotalDragDistance;
+                        } else {
+                            if (mDispatchTargetTouchDown) {
+                                MotionEvent obtain = MotionEvent.obtain(ev);
+                                obtain.setAction(MotionEvent.ACTION_CANCEL);
+                                mDispatchTargetTouchDown = false;
+                                mTarget.dispatchTouchEvent(obtain);
+                            }
+                        }
                     }
                 } else {
                     final float scrollTop = yDiff * DRAG_RATE;

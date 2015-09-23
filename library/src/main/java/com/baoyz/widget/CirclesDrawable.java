@@ -49,7 +49,7 @@ class CirclesDrawable extends RefreshDrawable implements Runnable {
     private Rect mBounds;
 
     public CirclesDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
     }
 
     @Override

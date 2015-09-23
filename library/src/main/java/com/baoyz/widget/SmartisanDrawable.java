@@ -58,7 +58,7 @@ public class SmartisanDrawable extends RefreshDrawable {
     float mDegrees;
 
     public SmartisanDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
 
         mPaint.setAntiAlias(true);
         mPaint.setStrokeJoin(Paint.Join.ROUND);

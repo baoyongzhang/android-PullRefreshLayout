@@ -32,7 +32,7 @@ class ArcDrawable extends RefreshDrawable{
     private int mLevel;
 
     ArcDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setColor(Color.RED);
     }

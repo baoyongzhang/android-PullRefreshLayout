@@ -14,10 +14,9 @@ import android.graphics.drawable.Drawable;
 public abstract class RefreshDrawable extends Drawable implements Drawable.Callback, Animatable {
 
     private PullRefreshLayout mRefreshLayout;
-    private Rect mOriginBounds;
     private int mDirection;
 
-    public RefreshDrawable(Context context, PullRefreshLayout layout) {
+    public RefreshDrawable(PullRefreshLayout layout) {
         mRefreshLayout = layout;
     }
 
@@ -40,19 +39,13 @@ public abstract class RefreshDrawable extends Drawable implements Drawable.Callb
     public final void draw(Canvas canvas) {
         int save = canvas.save();
         if (mDirection == PullRefreshLayout.DIRECTION_DOWN) {
-            canvas.rotate(180, mOriginBounds.centerX(), mOriginBounds.centerY());
+            canvas.rotate(180, getBounds().centerX(), getBounds().centerY());
         }
         onDraw(canvas);
         canvas.restoreToCount(save);
     }
 
     public abstract void onDraw(Canvas canvas);
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        super.onBoundsChange(bounds);
-        mOriginBounds = bounds;
-    }
 
     @Override
     public void invalidateDrawable(Drawable who) {

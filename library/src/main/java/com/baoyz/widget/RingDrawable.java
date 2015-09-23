@@ -29,7 +29,7 @@ class RingDrawable extends RefreshDrawable {
     private float mDegress;
 
     RingDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(dp2px(3));

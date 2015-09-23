@@ -151,7 +151,7 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     private int mDiameter;
 
     public MaterialDrawable(Context context, PullRefreshLayout parent) {
-        super(context, parent);
+        super(parent);
         mParent = parent;
         mResources = context.getResources();
 

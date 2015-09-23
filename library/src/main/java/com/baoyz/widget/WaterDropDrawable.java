@@ -40,7 +40,7 @@ class WaterDropDrawable extends RefreshDrawable implements Runnable {
     }
 
     public WaterDropDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
         mPaint = new Paint();
         mPaint.setColor(Color.BLUE);
         mPaint.setStyle(Paint.Style.FILL);

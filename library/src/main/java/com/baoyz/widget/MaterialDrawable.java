@@ -326,7 +326,7 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 //    }
 
     @Override
-    public void draw(Canvas c) {
+    public void onDraw(Canvas c) {
         Rect bounds = getBounds();
         final int saveCount = c.save();
         c.translate(0, mTop);

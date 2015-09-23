@@ -198,7 +198,7 @@ class CirclesDrawable extends RefreshDrawable implements Runnable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         if (mCurrentState != null) {
             canvas.save();
             canvas.translate(mBounds.width() / 2 - mDrawWidth / 2, mTop);

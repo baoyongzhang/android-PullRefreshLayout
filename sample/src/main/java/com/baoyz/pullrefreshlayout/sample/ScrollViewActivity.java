@@ -26,7 +26,7 @@ public class ScrollViewActivity extends Activity {
                     public void run() {
                         layout.setRefreshing(false);
                     }
-                }, 3000);
+                }, 10000);
             }
         });
         layout.setColorSchemeColors(Color.GRAY);

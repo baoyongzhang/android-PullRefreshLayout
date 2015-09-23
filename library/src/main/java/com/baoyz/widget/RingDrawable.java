@@ -94,7 +94,7 @@ class RingDrawable extends RefreshDrawable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         canvas.save();
 //        canvas.translate(0, mTop);
         canvas.rotate(mDegress, mBounds.centerX(), mBounds.centerY());

@@ -20,7 +20,7 @@ public class ScrollViewActivity extends Activity {
         layout = (PullRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
             @Override
-            public void onRefresh() {
+            public void onRefresh(int direction) {
                 layout.postDelayed(new Runnable() {
                     @Override
                     public void run() {

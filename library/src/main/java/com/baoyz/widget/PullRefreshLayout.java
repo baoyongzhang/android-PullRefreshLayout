@@ -25,6 +25,8 @@ import java.security.InvalidParameterException;
  */
 public class PullRefreshLayout extends ViewGroup {
 
+    private static final String TAG = "PRL";
+
     private static final float DECELERATE_INTERPOLATION_FACTOR = 2f;
     private static final int DRAG_MAX_DISTANCE = 64;
     private static final int INVALID_POINTER = -1;
@@ -384,7 +386,7 @@ public class PullRefreshLayout extends ViewGroup {
         return MotionEventCompat.getY(ev, index);
     }
 
-    private boolean canChildScroll(){
+    private boolean canChildScroll() {
         return mScrollDirection == DIRECTION_UP ? canChildScrollUp() : canChildScrollDown();
     }
 
@@ -414,6 +416,7 @@ public class PullRefreshLayout extends ViewGroup {
                 return mTarget.getScrollY() > 0;
             }
         } else {
+            Log.d(TAG, "getScrollY " + mTarget.getScrollY());
             return ViewCompat.canScrollVertically(mTarget, DIRECTION_DOWN);
         }
     }
@@ -467,7 +470,7 @@ public class PullRefreshLayout extends ViewGroup {
         mRefreshDrawable.setPercent(mDragPercent * (1 - interpolatedTime));
     }
 
-    private int getTargetTop(){
+    private int getTargetTop() {
         return mScrollDirection == DIRECTION_UP ? mTarget.getTop() : -mTarget.getTop();
 //        return mTarget.getTop();
     }
@@ -508,7 +511,7 @@ public class PullRefreshLayout extends ViewGroup {
                 mRefreshDrawable.start();
                 if (mNotify) {
                     if (mListener != null) {
-                        mListener.onRefresh();
+                        mListener.onRefresh(mScrollDirection);
                     }
                 }
             } else {
@@ -556,6 +559,10 @@ public class PullRefreshLayout extends ViewGroup {
         mRefreshView.layout(left, top, left + width - right, top + height - bottom);
     }
 
+    public int getScrollDirection() {
+        return mScrollDirection;
+    }
+
     private int dp2px(int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getContext().getResources().getDisplayMetrics());
     }
@@ -564,7 +571,27 @@ public class PullRefreshLayout extends ViewGroup {
         mListener = listener;
     }
 
-    public static interface OnRefreshListener {
-        public void onRefresh();
+    public interface OnRefreshListener {
+        void onRefresh(int direction);
+    }
+
+    public static class SimpleOnRefreshListener implements OnRefreshListener {
+
+        @Override
+        public void onRefresh(int direction) {
+            if (direction == DIRECTION_UP) {
+                onRefresh();
+            } else {
+                onRefreshMore();
+            }
+        }
+
+        public void onRefresh() {
+
+        }
+
+        public void onRefreshMore() {
+
+        }
     }
 }

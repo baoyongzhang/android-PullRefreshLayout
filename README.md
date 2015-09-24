@@ -54,7 +54,7 @@ layout.setRefreshing(false);
 
 ```
 
-Change the refresh style, there are four styles of use, `MATERIAL`、`CIRCLES`、 `WATER_DROP` and `RING`.  
+Change the refresh style, there are five styles of use, `MATERIAL`、`CIRCLES`、 `WATER_DROP`、`RING` and `SMARTISAN`.  
 
 In java, call `setRefreshStyle` method.
 
@@ -70,7 +70,7 @@ In xml, use attributes.
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	app:type="water_drop">
+	app:refreshType="water_drop">
 	
 </com.baoyz.widget.PullRefreshLayout>
 
@@ -84,6 +84,12 @@ layout.setColorSchemeColors(int []);
 
 ```
 
+For Smartisan style, it has only one color, can call 'setColor' method, to set one color.
+
+```java
+layout.setColor(int);
+```
+
 In xml, use attributes.
 
 ```xml
@@ -91,10 +97,63 @@ In xml, use attributes.
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:colors="@array/scheme_colors">
+    app:refreshColors="@array/scheme_colors"
+    app:refreshColor="@color/one_color">
 	
 </com.baoyz.widget.PullRefreshLayout>
 
+```
+
+If you do not like these styles, you can customize the refresh style.
+
+```java
+class CustomDrawable extends RefreshDrawable{
+
+    @Override
+    public void setPercent(float percent) {
+        // Percentage of the maximum distance of the drop-down refresh.
+    }
+
+    @Override
+    public void setColorSchemeColors(int[] colorSchemeColors) {
+        
+    }
+
+    @Override
+    public void offsetTopAndBottom(int offset) {
+        // Drop-down offset.
+    }
+
+    @Override
+    public void start() {
+        isRunning = true;
+        // Refresh started, start refresh animation.
+    }
+
+    @Override
+    public void stop() {
+        isRunning = false;
+        // Refresh completed, stop refresh animation.
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        // Draw custom style.
+    }
+
+}
+
+```
+
+Call `setRefreshDrawable()` method to use your custom refresh drawable.
+
+```java
+layout.setRefreshDrawable(new CustomDrawable());
 ```
 
 # Thanks

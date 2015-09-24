@@ -8,7 +8,12 @@
             <enum name="ring" value="3" />
             <enum name="smartisan" value="4" />
         </attr>
-        <attr name="refreshColors" format="reference"/>
-        <attr name="refreshColor" format="reference"/>
+        <attr name="refreshColors" format="reference" />
+        <attr name="refreshColor" format="reference" />
+        <attr name="refreshDirection" format="enum">
+            <enum name="up" value="0"/>
+            <enum name="down" value="1"/>
+            <enum name="both" value="2"/>
+        </attr>
     </declare-styleable>
 </resources>

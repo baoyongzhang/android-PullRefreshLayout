@@ -28,7 +28,7 @@ dependencies {
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version = "2.0.0"
+version = "1.2.0"
 def siteUrl = 'https://github.com/baoyongzhang/android-PullRefreshLayout'
 def gitUrl = 'https://github.com/baoyongzhang/android-PullRefreshLayout.git'
 group = "com.baoyz.pullrefreshlayout"

@@ -45,13 +45,6 @@ public class RecyclerViewActivity extends Activity {
             }
         });
 
-        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                Log.d("byz", "getScrollY " + recyclerView.get());
-            }
-        });
     }
 
     static class ArrayAdapter extends RecyclerView.Adapter<ViewHolder>{

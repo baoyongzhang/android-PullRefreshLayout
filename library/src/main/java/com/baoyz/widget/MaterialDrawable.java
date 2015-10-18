@@ -36,6 +36,7 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -59,6 +60,7 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     private static final Interpolator START_CURVE_INTERPOLATOR = new StartCurveInterpolator();
     private static final Interpolator EASE_INTERPOLATOR = new AccelerateDecelerateInterpolator();
     private Rect mRect;
+    private boolean isRunning;
 
     @Retention(RetentionPolicy.CLASS)
     @IntDef({LARGE, DEFAULT})
@@ -386,19 +388,12 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 
     @Override
     public boolean isRunning() {
-        final ArrayList<Animation> animators = mAnimators;
-        final int N = animators.size();
-        for (int i = 0; i < N; i++) {
-            final Animation animator = animators.get(i);
-            if (animator.hasStarted() && !animator.hasEnded()) {
-                return true;
-            }
-        }
-        return false;
+        return isRunning;
     }
 
     @Override
     public void start() {
+        isRunning = true;
         mAnimation.reset();
         mRing.storeOriginals();
         // Already showing some part of the ring
@@ -418,6 +413,7 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
         mRing.setShowArrow(false);
         mRing.setColorIndex(0);
         mRing.resetOriginals();
+        isRunning = false;
     }
 
     private void setupAnimators() {
@@ -426,6 +422,10 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
             public void applyTransformation(float interpolatedTime, Transformation t) {
                 // shrink back down and complete a full rotation before starting other circles
                 // Rotation goes between [0..1].
+                if (!isRunning) {
+                    mParent.clearAnimation();
+                    return;
+                }
                 float targetRotation = (float) (Math.floor(ring.getStartingRotation()
                         / MAX_PROGRESS_ARC) + 1f);
                 final float startTrim = ring.getStartingStartTrim()
@@ -463,6 +463,10 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
             public void applyTransformation(float interpolatedTime, Transformation t) {
                 // The minProgressArc is calculated from 0 to create an angle that
                 // matches the stroke width.
+                if (!isRunning) {
+                    mParent.clearAnimation();
+                    return;
+                }
                 final float minProgressArc = (float) Math.toRadians(ring.getStrokeWidth()
                         / (2 * Math.PI * ring.getCenterRadius()));
                 final float startingEndTrim = ring.getStartingEndTrim();

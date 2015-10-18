@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.baoyz.widget.PullRefreshLayout;
+import com.baoyz.pullrefreshlayout.sample.gank.GankActivity;
 
 public class DemoActivity extends Activity {
 
@@ -27,6 +27,11 @@ public class DemoActivity extends Activity {
 
     public void onScrollViewClick(View view) {
         startActivity(new Intent(this, ScrollViewActivity.class));
+    }
+
+    public void onGankDemoClick(View view) {
+        // Content from http://gank.io
+        startActivity(new Intent(this, GankActivity.class));
     }
 
 }

@@ -24,4 +24,10 @@
         android:onClick="onScrollViewClick"
         android:text="ScrollView"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onGankDemoClick"
+        android:text="Gank.io Demo"/>
+
 </LinearLayout>

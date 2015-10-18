@@ -15,4 +15,8 @@
         <item>@color/yellow</item>
         <item>@color/green</item>
     </integer-array>
+    <string name="title_activity_gank">GankActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>

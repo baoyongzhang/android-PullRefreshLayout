@@ -36,7 +36,6 @@ import android.graphics.drawable.shapes.OvalShape;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -59,6 +58,7 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     private static final Interpolator END_CURVE_INTERPOLATOR = new EndCurveInterpolator();
     private static final Interpolator START_CURVE_INTERPOLATOR = new StartCurveInterpolator();
     private static final Interpolator EASE_INTERPOLATOR = new AccelerateDecelerateInterpolator();
+    private Rect mRect;
 
     @Retention(RetentionPolicy.CLASS)
     @IntDef({LARGE, DEFAULT})
@@ -205,8 +205,8 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 
         @Override
         public void draw(Canvas canvas, Paint paint) {
-            final int x = MaterialDrawable.this.getBounds().centerX();
-            final int y = MaterialDrawable.this.getBounds().centerY();
+            final int x = mRect.centerX();
+            final int y = mRect.centerY();
             canvas.drawCircle(x, y, (mCircleDiameter / 2 + mShadowRadius),
                     mShadowPaint);
             canvas.drawCircle(x, y, (mCircleDiameter / 2), paint);
@@ -287,13 +287,12 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     public void setPercent(float percent) {
         if (percent < .4f)
             return;
-        percent = (percent - .4f) / .6f;
+        percent = (percent - .4f) / .6f * 1.2f;
         setAlpha((int) (MAX_ALPHA * percent));
         showArrow(true);
-        float strokeStart = ((percent) * .8f);
-        setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, strokeStart));
+        setStartEndTrim(0f, Math.min(MAX_PROGRESS_ANGLE, percent));
         setArrowScale(Math.min(1f, percent));
-        float rotation = percent < .8f ? 0 : (percent - .8f) / .2f * .25f;
+        float rotation = percent > MAX_PROGRESS_ANGLE ? (percent - MAX_PROGRESS_ANGLE) * .9f : 0;
         setProgressRotation(rotation);
     }
 
@@ -327,7 +326,7 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
 
     @Override
     public void onDraw(Canvas c) {
-        Rect bounds = getBounds();
+        Rect bounds = mRect;
         final int saveCount = c.save();
         c.translate(0, mTop);
         mCircle.draw(c);
@@ -340,14 +339,16 @@ class MaterialDrawable extends RefreshDrawable implements Animatable {
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
-
+        int w = bounds.width();
+        int top = bounds.top;
+        mRect = new Rect(w / 2 - mDiameter / 2, top, w / 2 + mDiameter / 2, mDiameter + top);
     }
 
-    @Override
-    public void setBounds(int left, int top, int right, int bottom) {
-        int w = right - left;
-        super.setBounds(w / 2 - mDiameter / 2, top, w / 2 + mDiameter / 2, mDiameter + top);
-    }
+//    @Override
+//    public void setBounds(int left, int top, int right, int bottom) {
+//        int w = right - left;
+//        super.setBounds(w / 2 - mDiameter / 2, top, w / 2 + mDiameter / 2, mDiameter + top);
+//    }
 
     private int dp2px(int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getContext().getResources().getDisplayMetrics());

@@ -8,6 +8,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +43,7 @@ public class PullRefreshLayout extends ViewGroup {
 
     public static final int DIRECTION_UP = -1;
     public static final int DIRECTION_DOWN = 1;
+    public static final int DIRECTION_NONE = 0;
 
     private View mTarget;
     private ImageView mRefreshView;
@@ -487,6 +489,9 @@ public class PullRefreshLayout extends ViewGroup {
 
     public void setRefreshing(boolean refreshing) {
         if (mRefreshing != refreshing) {
+            if (mScrollDirection == DIRECTION_NONE) {
+                mScrollDirection = DIRECTION_UP;
+            }
             setRefreshing(refreshing, false /* notify */);
         }
     }

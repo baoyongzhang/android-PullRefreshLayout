@@ -5,10 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -417,18 +414,9 @@ public class PullRefreshLayout extends ViewGroup {
                         && (absListView.getLastVisiblePosition() < (absListView.getCount() - 1) || absListView.getChildAt((absListView.getCount() - 1))
                         .getBottom() < absListView.getPaddingBottom());
             } else {
-                return mTarget.getScrollY() > 0;
+                return ViewCompat.canScrollVertically(mTarget, DIRECTION_DOWN);
             }
         } else {
-            if (mTarget instanceof RecyclerView) {
-                RecyclerView recyclerView = (RecyclerView) mTarget;
-                if (recyclerView.getLayoutManager() instanceof LinearLayoutManager) {
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    return layoutManager.getItemCount() > 0
-                            && (layoutManager.findLastVisibleItemPosition() < (layoutManager.getItemCount() - 1) || layoutManager.getChildAt(layoutManager.getChildCount() - 1)
-                            .getBottom() < layoutManager.getPaddingBottom());
-                }
-            }
             return ViewCompat.canScrollVertically(mTarget, DIRECTION_DOWN);
         }
     }

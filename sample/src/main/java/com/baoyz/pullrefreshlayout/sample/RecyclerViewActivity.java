@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +24,7 @@ public class RecyclerViewActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recycler_view);
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         String[] array = new String[50];
         for (int i = 0; i < array.length; i++) {
@@ -34,7 +35,7 @@ public class RecyclerViewActivity extends Activity {
         layout = (PullRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         layout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
             @Override
-            public void onRefresh() {
+            public void onRefresh(int direction) {
                 layout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -43,6 +44,7 @@ public class RecyclerViewActivity extends Activity {
                 }, 4000);
             }
         });
+
     }
 
     static class ArrayAdapter extends RecyclerView.Adapter<ViewHolder>{

@@ -49,7 +49,7 @@ class CirclesDrawable extends RefreshDrawable implements Runnable {
     private Rect mBounds;
 
     public CirclesDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
     }
 
     @Override
@@ -198,7 +198,7 @@ class CirclesDrawable extends RefreshDrawable implements Runnable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         if (mCurrentState != null) {
             canvas.save();
             canvas.translate(mBounds.width() / 2 - mDrawWidth / 2, mTop);

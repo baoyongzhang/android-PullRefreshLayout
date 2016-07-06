@@ -25,6 +25,8 @@ import java.security.InvalidParameterException;
  */
 public class PullRefreshLayout extends ViewGroup {
 
+    private static final String TAG = "PRL";
+
     private static final float DECELERATE_INTERPOLATION_FACTOR = 2f;
     private static final int DRAG_MAX_DISTANCE = 64;
     private static final int INVALID_POINTER = -1;
@@ -35,6 +37,10 @@ public class PullRefreshLayout extends ViewGroup {
     public static final int STYLE_WATER_DROP = 2;
     public static final int STYLE_RING = 3;
     public static final int STYLE_SMARTISAN = 4;
+
+    public static final int DIRECTION_UP = -1;
+    public static final int DIRECTION_DOWN = 1;
+    public static final int DIRECTION_NONE = 0;
 
     private View mTarget;
     private ImageView mRefreshView;
@@ -58,6 +64,7 @@ public class PullRefreshLayout extends ViewGroup {
     private int mInitialOffsetTop;
     private boolean mDispatchTargetTouchDown;
     private float mDragPercent;
+    private int mScrollDirection;
 
     public PullRefreshLayout(Context context) {
         this(context, null);
@@ -171,7 +178,7 @@ public class PullRefreshLayout extends ViewGroup {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
-        if (!isEnabled() || (canChildScrollUp() && !mRefreshing)) {
+        if (!isEnabled()) {
             return false;
         }
 
@@ -179,9 +186,9 @@ public class PullRefreshLayout extends ViewGroup {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                if (!mRefreshing) {
-                    setTargetOffsetTop(0, true);
-                }
+//                if (!mRefreshing) {
+//                    setTargetOffsetTop(0, true);
+//                }
                 mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
                 mIsBeingDragged = false;
                 final float initialMotionY = getMotionEventY(ev, mActivePointerId);
@@ -201,11 +208,21 @@ public class PullRefreshLayout extends ViewGroup {
                 if (y == -1) {
                     return false;
                 }
-                final float yDiff = y - mInitialMotionY;
+                float yDiff = y - mInitialMotionY;
                 if (mRefreshing) {
+                    yDiff = mScrollDirection == DIRECTION_UP ? y - mInitialMotionY : mInitialMotionY - y;
                     mIsBeingDragged = !(yDiff < 0 && mCurrentOffsetTop <= 0);
-                } else if (yDiff > mTouchSlop && !mIsBeingDragged) {
-                    mIsBeingDragged = true;
+                } else if (Math.abs(yDiff) > mTouchSlop && !mIsBeingDragged) {
+                    if (yDiff > 0) {
+                        // scroll up
+                        mIsBeingDragged = !canChildScrollUp();
+                        mScrollDirection = DIRECTION_UP;
+                    } else {
+                        // scroll down
+                        mIsBeingDragged = !canChildScrollDown();
+                        mScrollDirection = DIRECTION_DOWN;
+                    }
+                    mRefreshDrawable.setDirection(mScrollDirection);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -238,11 +255,11 @@ public class PullRefreshLayout extends ViewGroup {
                 }
 
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-                final float yDiff = y - mInitialMotionY;
+                final float yDiff = mScrollDirection == DIRECTION_UP ? y - mInitialMotionY : mInitialMotionY - y;
                 int targetY;
                 if (mRefreshing) {
                     targetY = (int) (mInitialOffsetTop + yDiff);
-                    if (canChildScrollUp()) {
+                    if (canChildScroll()) {
                         targetY = -1;
                         mInitialMotionY = y;
                         mInitialOffsetTop = 0;
@@ -322,9 +339,9 @@ public class PullRefreshLayout extends ViewGroup {
                 }
                 final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
                 final float y = MotionEventCompat.getY(ev, pointerIndex);
-                final float overscrollTop = (y - mInitialMotionY) * DRAG_RATE;
+                final float overScrollTop = (mScrollDirection == DIRECTION_UP ? y - mInitialMotionY : mInitialMotionY - y) * DRAG_RATE;
                 mIsBeingDragged = false;
-                if (overscrollTop > mTotalDragDistance) {
+                if (overScrollTop > mTotalDragDistance) {
                     setRefreshing(true, true);
                 } else {
                     mRefreshing = false;
@@ -336,6 +353,72 @@ public class PullRefreshLayout extends ViewGroup {
         }
 
         return true;
+    }
+
+    private void setTargetOffsetTop(int offset, boolean requiresUpdate) {
+        if (mScrollDirection == DIRECTION_DOWN) {
+            mTarget.offsetTopAndBottom(-offset);
+            mRefreshDrawable.offsetTopAndBottom(offset);
+        } else {
+            mTarget.offsetTopAndBottom(offset);
+            mRefreshDrawable.offsetTopAndBottom(offset);
+        }
+        mCurrentOffsetTop = getTargetTop();
+
+        if (requiresUpdate && android.os.Build.VERSION.SDK_INT < 11) {
+            invalidate();
+        }
+    }
+
+    private void onSecondaryPointerUp(MotionEvent ev) {
+        final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+        final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+        if (pointerId == mActivePointerId) {
+            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+        }
+    }
+
+    private float getMotionEventY(MotionEvent ev, int activePointerId) {
+        final int index = MotionEventCompat.findPointerIndex(ev, activePointerId);
+        if (index < 0) {
+            return -1;
+        }
+        return MotionEventCompat.getY(ev, index);
+    }
+
+    private boolean canChildScroll() {
+        return mScrollDirection == DIRECTION_UP ? canChildScrollUp() : canChildScrollDown();
+    }
+
+    private boolean canChildScrollUp() {
+        if (android.os.Build.VERSION.SDK_INT < 14) {
+            if (mTarget instanceof AbsListView) {
+                final AbsListView absListView = (AbsListView) mTarget;
+                return absListView.getChildCount() > 0
+                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
+                        .getTop() < absListView.getPaddingTop());
+            } else {
+                return mTarget.getScrollY() > 0;
+            }
+        } else {
+            return ViewCompat.canScrollVertically(mTarget, DIRECTION_UP);
+        }
+    }
+
+    private boolean canChildScrollDown() {
+        if (android.os.Build.VERSION.SDK_INT < 14) {
+            if (mTarget instanceof AbsListView) {
+                final AbsListView absListView = (AbsListView) mTarget;
+                return absListView.getChildCount() > 0
+                        && (absListView.getLastVisiblePosition() < (absListView.getCount() - 1) || absListView.getChildAt((absListView.getCount() - 1))
+                        .getBottom() < absListView.getPaddingBottom());
+            } else {
+                return ViewCompat.canScrollVertically(mTarget, DIRECTION_DOWN);
+            }
+        } else {
+            return ViewCompat.canScrollVertically(mTarget, DIRECTION_DOWN);
+        }
     }
 
     public void setDurations(int durationToStartPosition, int durationToCorrectPosition) {
@@ -375,20 +458,28 @@ public class PullRefreshLayout extends ViewGroup {
         public void applyTransformation(float interpolatedTime, Transformation t) {
             int endTarget = mSpinnerFinalOffset;
             int targetTop = (mFrom + (int) ((endTarget - mFrom) * interpolatedTime));
-            int offset = targetTop - mTarget.getTop();
+            int offset = targetTop - getTargetTop();
             setTargetOffsetTop(offset, false /* requires update */);
         }
     };
 
     private void moveToStart(float interpolatedTime) {
         int targetTop = mFrom - (int) (mFrom * interpolatedTime);
-        int offset = targetTop - mTarget.getTop();
+        int offset = targetTop - getTargetTop();
         setTargetOffsetTop(offset, false);
         mRefreshDrawable.setPercent(mDragPercent * (1 - interpolatedTime));
     }
 
+    private int getTargetTop() {
+        return mScrollDirection == DIRECTION_UP ? mTarget.getTop() : -mTarget.getTop();
+//        return mTarget.getTop();
+    }
+
     public void setRefreshing(boolean refreshing) {
         if (mRefreshing != refreshing) {
+            if (mScrollDirection == DIRECTION_NONE) {
+                mScrollDirection = DIRECTION_UP;
+            }
             setRefreshing(refreshing, false /* notify */);
         }
     }
@@ -423,7 +514,7 @@ public class PullRefreshLayout extends ViewGroup {
                 mRefreshDrawable.start();
                 if (mNotify) {
                     if (mListener != null) {
-                        mListener.onRefresh();
+                        mListener.onRefresh(mScrollDirection);
                     }
                 }
             } else {
@@ -431,7 +522,7 @@ public class PullRefreshLayout extends ViewGroup {
                 mRefreshView.setVisibility(View.GONE);
                 animateOffsetToStartPosition();
             }
-            mCurrentOffsetTop = mTarget.getTop();
+            mCurrentOffsetTop = getTargetTop();
         }
     };
 
@@ -449,51 +540,9 @@ public class PullRefreshLayout extends ViewGroup {
         public void onAnimationEnd(Animation animation) {
 //            mRefreshDrawable.stop();
             mRefreshView.setVisibility(View.GONE);
-            mCurrentOffsetTop = mTarget.getTop();
+            mCurrentOffsetTop = getTargetTop();
         }
     };
-
-    private void onSecondaryPointerUp(MotionEvent ev) {
-        final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-        final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
-        if (pointerId == mActivePointerId) {
-            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
-        }
-    }
-
-    private float getMotionEventY(MotionEvent ev, int activePointerId) {
-        final int index = MotionEventCompat.findPointerIndex(ev, activePointerId);
-        if (index < 0) {
-            return -1;
-        }
-        return MotionEventCompat.getY(ev, index);
-    }
-
-    private void setTargetOffsetTop(int offset, boolean requiresUpdate) {
-//        mRefreshView.bringToFront();
-        mTarget.offsetTopAndBottom(offset);
-        mCurrentOffsetTop = mTarget.getTop();
-        mRefreshDrawable.offsetTopAndBottom(offset);
-        if (requiresUpdate && android.os.Build.VERSION.SDK_INT < 11) {
-            invalidate();
-        }
-    }
-
-    private boolean canChildScrollUp() {
-        if (android.os.Build.VERSION.SDK_INT < 14) {
-            if (mTarget instanceof AbsListView) {
-                final AbsListView absListView = (AbsListView) mTarget;
-                return absListView.getChildCount() > 0
-                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
-                        .getTop() < absListView.getPaddingTop());
-            } else {
-                return mTarget.getScrollY() > 0;
-            }
-        } else {
-            return ViewCompat.canScrollVertically(mTarget, -1);
-        }
-    }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -513,6 +562,10 @@ public class PullRefreshLayout extends ViewGroup {
         mRefreshView.layout(left, top, left + width - right, top + height - bottom);
     }
 
+    public int getScrollDirection() {
+        return mScrollDirection;
+    }
+
     private int dp2px(int dp) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getContext().getResources().getDisplayMetrics());
     }
@@ -521,7 +574,27 @@ public class PullRefreshLayout extends ViewGroup {
         mListener = listener;
     }
 
-    public static interface OnRefreshListener {
-        public void onRefresh();
+    public interface OnRefreshListener {
+        void onRefresh(int direction);
+    }
+
+    public static class SimpleOnRefreshListener implements OnRefreshListener {
+
+        @Override
+        public void onRefresh(int direction) {
+            if (direction == DIRECTION_UP) {
+                onRefresh();
+            } else {
+                onRefreshMore();
+            }
+        }
+
+        public void onRefresh() {
+
+        }
+
+        public void onRefreshMore() {
+
+        }
     }
 }

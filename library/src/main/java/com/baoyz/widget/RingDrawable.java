@@ -29,7 +29,7 @@ class RingDrawable extends RefreshDrawable {
     private float mDegress;
 
     RingDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(dp2px(3));
@@ -94,7 +94,7 @@ class RingDrawable extends RefreshDrawable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
         canvas.save();
 //        canvas.translate(0, mTop);
         canvas.rotate(mDegress, mBounds.centerX(), mBounds.centerY());

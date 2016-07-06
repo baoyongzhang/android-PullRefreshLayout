@@ -26,6 +26,7 @@ package com.baoyz.widget;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -57,7 +58,7 @@ public class SmartisanDrawable extends RefreshDrawable {
     float mDegrees;
 
     public SmartisanDrawable(Context context, PullRefreshLayout layout) {
-        super(context, layout);
+        super(layout);
 
         mPaint.setAntiAlias(true);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
@@ -114,7 +115,7 @@ public class SmartisanDrawable extends RefreshDrawable {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void onDraw(Canvas canvas) {
 
         canvas.save();
 

@@ -1,8 +1,10 @@
 package com.baoyz.widget;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 
@@ -12,8 +14,9 @@ import android.graphics.drawable.Drawable;
 public abstract class RefreshDrawable extends Drawable implements Drawable.Callback, Animatable {
 
     private PullRefreshLayout mRefreshLayout;
+    private int mDirection;
 
-    public RefreshDrawable(Context context, PullRefreshLayout layout) {
+    public RefreshDrawable(PullRefreshLayout layout) {
         mRefreshLayout = layout;
     }
 
@@ -27,8 +30,22 @@ public abstract class RefreshDrawable extends Drawable implements Drawable.Callb
 
     public abstract void setPercent(float percent);
     public abstract void setColorSchemeColors(int[] colorSchemeColors);
-
     public abstract void offsetTopAndBottom(int offset);
+    public void setDirection(int direction) {
+        mDirection = direction;
+    }
+
+    @Override
+    public final void draw(Canvas canvas) {
+        int save = canvas.save();
+        if (mDirection == PullRefreshLayout.DIRECTION_DOWN) {
+            canvas.rotate(180, getBounds().centerX(), getBounds().centerY());
+        }
+        onDraw(canvas);
+        canvas.restoreToCount(save);
+    }
+
+    public abstract void onDraw(Canvas canvas);
 
     @Override
     public void invalidateDrawable(Drawable who) {

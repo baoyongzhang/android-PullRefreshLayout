@@ -16,7 +16,7 @@ Add dependency.
 
 ```
 dependencies {
-    compile 'com.baoyz.pullrefreshlayout:library:1.2.0'
+    implementation 'com.baoyz.pullrefreshlayout:library:1.2.0'
 }
 ```
 
